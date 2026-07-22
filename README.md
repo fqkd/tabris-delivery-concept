@@ -1,32 +1,57 @@
-# React + TypeScript + Vite
+# Табрис — концепт мобильного приложения доставки
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Интерактивный high-fidelity мокап первого этапа: главная, каталог собственного
+производства, карточка товара, корзина и выбор адреса. Проект не является
+официальным приложением сети и предназначен только для демонстрации визуального
+направления.
 
-Currently, two official plugins are available:
+## Выводы исследования
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Коммуникация «Табриса» строится вокруг гастрономических открытий, собственного
+  производства, необычного импорта и вдохновения, а не только вокруг цены.
+- Текущий сайт и приложение узнаваемы по глубокому зелёному полю, светлому
+  интерфейсу и листовому знаку. Текущее приложение в первую очередь раскрывает
+  каталог, акции и «Табрис Бонус», поэтому доставочному сценарию нужны более
+  заметные адрес, время и корзина.
+- «Табрис Бонус» — самостоятельная ценность бренда: баланс показан компактно,
+  без превращения главной в экран программы лояльности.
+- Из Freshora взяты только принципы: воздух, ясная иерархия, крупная
+  food-фотография и лёгкие товарные карточки. Его кислотная палитра, тексты,
+  графика и композиции экранов не копируются.
 
-## React Compiler
+## Визуальное направление
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Тёплый молочный фон, белые поверхности, фирменные зелёные оттенки и графитовый
+текст. Фотографии сняты в единой редакционной стилистике на светлом камне.
+Скругления умеренные, тени используются только для разделения уровней, а все
+иконки относятся к одному набору Lucide. Основной шрифт — Manrope, подключённый
+локально через npm-пакет.
 
-## Expanding the Oxlint configuration
+## Источники исследования и ассетов
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+- [Официальный сайт «Табрис»](https://www.tabris.ru/)
+- [Ассортимент](https://www.tabris.ru/pokupatelyam/tovary/)
+- [Программа «Табрис Бонус»](https://www.tabris.ru/bonus/)
+- [Текущее приложение в Google Play](https://play.google.com/store/apps/details?id=com.newmen.tabris)
+- [Freshora — UI/UX reference](https://www.behance.net/gallery/243569925/Freshora-Grocery-Shopping-Mobile-AppUIUX-Design)
+- Листовой знак сохранён локально из официальной карточки приложения в Google
+  Play без изменения графики.
+- Девять продуктовых фотографий созданы 22 июля 2026 года встроенным генератором
+  изображений OpenAI специально для этого неофициального концепта. Промпт:
+  единый набор премиальной редакционной food-фотографии на тёплом светлом камне,
+  мягкий дневной свет, одинаковый ракурс и цветокоррекция, без логотипов, текста,
+  упаковки и водяных знаков.
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+## Локальный запуск
+
+```bash
+npm install
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Проверки:
+
+```bash
+npm run lint
+npm run build
+```
