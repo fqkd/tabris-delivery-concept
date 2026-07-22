@@ -1,84 +1,72 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { CartState, DeliveryAddress } from '../types'
+import { useEffect, useMemo, useReducer, useState, type ReactNode } from 'react'
+import { getCartItemCount } from '../lib/cart'
+import { loadPersistedState, savePersistedState } from '../lib/storage'
 import { ShopContext } from './ShopContext'
-
-const CART_KEY = 'tabris-concept-cart'
-const ADDRESS_KEY = 'tabris-concept-address'
-const ADDRESS_CONFIRMED_KEY = 'tabris-concept-address-confirmed'
-
-const defaultAddress: DeliveryAddress = {
-  city: 'Краснодар',
-  street: 'ул. Красная, 202',
-  deliveryTime: 'Сегодня, 16:30–17:00',
-}
-
-const readCart = (): CartState => {
-  try {
-    return JSON.parse(sessionStorage.getItem(CART_KEY) ?? '{}') as CartState
-  } catch {
-    return {}
-  }
-}
-
-const readAddress = (): DeliveryAddress => {
-  try {
-    return JSON.parse(
-      sessionStorage.getItem(ADDRESS_KEY) ?? JSON.stringify(defaultAddress),
-    ) as DeliveryAddress
-  } catch {
-    return defaultAddress
-  }
-}
+import { shopReducer } from './shopReducer'
+import type {
+  CartAddition,
+  CatalogFilters,
+  CatalogSort,
+  DeliveryAddress,
+  OrderSnapshot,
+} from '../types'
 
 type ShopProviderProps = {
   children: ReactNode
 }
 
 export function ShopProvider({ children }: ShopProviderProps) {
-  const [cart, setCart] = useState<CartState>(readCart)
-  const [address, setAddress] = useState<DeliveryAddress>(readAddress)
+  const [state, dispatch] = useReducer(
+    shopReducer,
+    undefined,
+    loadPersistedState,
+  )
   const [isAddressOpen, setAddressOpen] = useState(
-    () => sessionStorage.getItem(ADDRESS_CONFIRMED_KEY) !== 'true',
+    () => !state.addressConfirmed,
   )
 
   useEffect(() => {
-    sessionStorage.setItem(CART_KEY, JSON.stringify(cart))
-  }, [cart])
+    savePersistedState(state)
+  }, [state])
 
   const value = useMemo(
     () => ({
-      cart,
-      address,
+      ...state,
       isAddressOpen,
-      cartCount: Object.values(cart).reduce((sum, quantity) => sum + quantity, 0),
-      setQuantity: (productId: string, quantity: number) => {
-        setCart((current) => {
-          const next = { ...current }
-          if (quantity <= 0) {
-            delete next[productId]
-          } else {
-            next[productId] = quantity
-          }
-          return next
-        })
-      },
-      removeFromCart: (productId: string) => {
-        setCart((current) => {
-          const next = { ...current }
-          delete next[productId]
-          return next
-        })
-      },
+      cartCount: getCartItemCount(state.cart),
+      setQuantity: (productId: string, quantity: number) =>
+        dispatch({ type: 'SET_QUANTITY', productId, quantity }),
+      addCartItems: (additions: CartAddition[]) =>
+        dispatch({ type: 'ADD_CART_ITEMS', additions }),
+      removeFromCart: (productId: string) =>
+        dispatch({ type: 'REMOVE_CART_ITEM', productId }),
+      clearCart: () => dispatch({ type: 'CLEAR_CART' }),
+      toggleFavorite: (productId: string) =>
+        dispatch({ type: 'TOGGLE_FAVORITE', productId }),
+      isFavorite: (productId: string) => state.favoriteIds.includes(productId),
       openAddress: () => setAddressOpen(true),
       closeAddress: () => setAddressOpen(false),
-      confirmAddress: (nextAddress: DeliveryAddress) => {
-        setAddress(nextAddress)
-        sessionStorage.setItem(ADDRESS_KEY, JSON.stringify(nextAddress))
-        sessionStorage.setItem(ADDRESS_CONFIRMED_KEY, 'true')
+      confirmAddress: (address: DeliveryAddress) => {
+        dispatch({ type: 'CONFIRM_ADDRESS', address })
         setAddressOpen(false)
       },
+      setSearchQuery: (query: string) =>
+        dispatch({ type: 'SET_SEARCH_QUERY', query }),
+      addRecentQuery: (query: string) =>
+        dispatch({ type: 'ADD_RECENT_QUERY', query }),
+      setSearchFilters: (filters: Partial<CatalogFilters>) =>
+        dispatch({ type: 'SET_SEARCH_FILTERS', filters }),
+      setSearchSort: (sort: CatalogSort) =>
+        dispatch({ type: 'SET_SEARCH_SORT', sort }),
+      setSearchScrollTop: (scrollTop: number) =>
+        dispatch({ type: 'SET_SEARCH_SCROLL', scrollTop }),
+      resetSearch: () => dispatch({ type: 'RESET_SEARCH' }),
+      setElectronicReceipts: (enabled: boolean) =>
+        dispatch({ type: 'SET_ELECTRONIC_RECEIPTS', enabled }),
+      placeOrder: (order: OrderSnapshot) =>
+        dispatch({ type: 'ORDER_PLACED', order }),
     }),
-    [address, cart, isAddressOpen],
+    [isAddressOpen, state],
   )
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>

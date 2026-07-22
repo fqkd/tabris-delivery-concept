@@ -1,4 +1,11 @@
-export type ProductSection = 'own' | 'ready' | 'sale'
+export type ProductCategoryId =
+  | 'ready'
+  | 'salads'
+  | 'bakery'
+  | 'desserts'
+  | 'cheese'
+  | 'fish'
+  | 'drinks'
 
 export type Product = {
   id: string
@@ -10,11 +17,21 @@ export type Product = {
   description: string
   ingredients: string
   shelfLife: string
-  bonus: number
-  sections: ProductSection[]
   ownProduction: boolean
   unavailable?: boolean
-  subcategory: 'Салаты' | 'Горячее' | 'Выпечка' | 'Десерты' | 'Роллы'
+  categoryId: ProductCategoryId
+  typeLabel: string
+  keywords: string[]
+  popularity: number
+  subcategory:
+    | 'Салаты'
+    | 'Горячее'
+    | 'Выпечка'
+    | 'Десерты'
+    | 'Роллы'
+    | 'Сыры'
+    | 'Рыба'
+    | 'Напитки'
 }
 
 export type DeliveryAddress = {
@@ -24,3 +41,118 @@ export type DeliveryAddress = {
 }
 
 export type CartState = Record<string, number>
+
+export type CartAddition = {
+  productId: string
+  quantity: number
+}
+
+export type CatalogSort =
+  | 'popular'
+  | 'price-asc'
+  | 'price-desc'
+  | 'discount'
+
+export type CatalogFilters = {
+  availableOnly: boolean
+  saleOnly: boolean
+  ownProductionOnly: boolean
+  categoryId: ProductCategoryId | 'all'
+}
+
+export type SearchState = {
+  query: string
+  recentQueries: string[]
+  filters: CatalogFilters
+  sort: CatalogSort
+  scrollTop: number
+}
+
+export type DemoProfile = {
+  name: string
+  phone: string
+}
+
+export type DeliverySlot = {
+  id: string
+  dayLabel: string
+  dateLabel: string
+  timeLabel: string
+  available: boolean
+}
+
+export type SubstitutionPolicy = 'similar' | 'contact' | 'remove'
+export type PaymentMethod = 'card' | 'sbp'
+
+export type OrderLineSnapshot = {
+  productId: string
+  name: string
+  image: string
+  weight: string
+  unitPrice: number
+  oldUnitPrice?: number
+  quantity: number
+}
+
+export type OrderTotals = {
+  listSubtotal: number
+  merchandiseSubtotal: number
+  productDiscount: number
+  deliveryFee: number
+  bonusSpent: number
+  payableTotal: number
+  bonusEarned: number
+  itemCount: number
+  minimumOrderReached: boolean
+}
+
+export type OrderStatus =
+  | 'placed'
+  | 'assembling'
+  | 'courier'
+  | 'delivering'
+  | 'delivered'
+
+export type OrderSnapshot = {
+  id: string
+  createdAt: string
+  status: OrderStatus
+  address: DeliveryAddress
+  deliverySlot: DeliverySlot
+  recipient: DemoProfile
+  substitutionPolicy: SubstitutionPolicy
+  paymentMethod: PaymentMethod
+  courierComment: string
+  electronicReceipt: boolean
+  lines: OrderLineSnapshot[]
+  totals: OrderTotals
+  bonusBalanceBefore: number
+  bonusBalanceAfter: number
+}
+
+export type PersistedShopState = {
+  cart: CartState
+  favoriteIds: string[]
+  address: DeliveryAddress
+  addressConfirmed: boolean
+  search: SearchState
+  profile: DemoProfile
+  electronicReceipts: boolean
+  bonusBalance: number
+  lastOrder: OrderSnapshot | null
+}
+
+export type DinnerSetItem = {
+  productId: string
+  quantity: number
+  role: string
+}
+
+export type DinnerSet = {
+  id: string
+  name: string
+  description: string
+  people: number
+  servingTime: string
+  items: DinnerSetItem[]
+}

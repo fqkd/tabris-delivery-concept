@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { ProductCard } from '../components/ProductCard'
 import { ownProductionProducts } from '../data/products'
+import { formatProductCount } from '../lib/format'
 
 const tabs = ['Все', 'Салаты', 'Горячее', 'Выпечка', 'Десерты', 'Роллы'] as const
 type Tab = (typeof tabs)[number]
@@ -26,7 +27,7 @@ export function CategoryPage() {
 
   return (
     <main className="screen screen--category has-bottom-nav">
-      <PageHeader title="Наше производство" />
+      <PageHeader title="Наше производство" backTo="/" />
 
       <div className="category-intro">
         <p>Готовим каждый день на собственных кухнях «Табриса»</p>
@@ -69,7 +70,7 @@ export function CategoryPage() {
       </div>
 
       <div className="catalog-count">
-        <span>{visibleProducts.length} товаров</span>
+        <span>{formatProductCount(visibleProducts.length)}</span>
         <span>Готово сегодня</span>
       </div>
 
@@ -85,6 +86,11 @@ export function CategoryPage() {
           <span>Выберите другой раздел</span>
         </div>
       )}
+
+      <p className="concept-note">
+        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        демонстрации.
+      </p>
     </main>
   )
 }

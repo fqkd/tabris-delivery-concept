@@ -1,53 +1,37 @@
-import { ChevronRight, Gift, ShoppingBag, Trash2, Truck } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { Gift, ShoppingBag, Trash2, Truck } from 'lucide-react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppPortal } from '../components/AppPortal'
 import { PageHeader } from '../components/PageHeader'
 import { QuantityControl } from '../components/QuantityControl'
+import { DEMO_RULES } from '../config/demoRules'
 import { useShop } from '../context/ShopContext'
-import { products } from '../data/products'
-import { formatPrice } from '../lib/format'
+import { calculateOrderTotals, getCartItems } from '../lib/cart'
+import { formatPrice, formatProductCount } from '../lib/format'
 
 export function CartPage() {
   const navigate = useNavigate()
-  const { cart, setQuantity, removeFromCart } = useShop()
-  const [showNotice, setShowNotice] = useState(false)
-
-  const cartItems = useMemo(
-    () =>
-      products
-        .filter((product) => (cart[product.id] ?? 0) > 0)
-        .map((product) => ({ product, quantity: cart[product.id] })),
-    [cart],
+  const { cart, setQuantity, removeFromCart, bonusBalance } = useShop()
+  const cartItems = useMemo(() => getCartItems(cart), [cart])
+  const totals = useMemo(
+    () => calculateOrderTotals(cart, 0, bonusBalance),
+    [bonusBalance, cart],
   )
-
-  const baseSubtotal = cartItems.reduce(
-    (sum, item) =>
-      sum + (item.product.oldPrice ?? item.product.price) * item.quantity,
-    0,
-  )
-  const currentSubtotal = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  )
-  const discount = baseSubtotal - currentSubtotal
-  const delivery = currentSubtotal >= 1500 || currentSubtotal === 0 ? 0 : 149
-  const total = currentSubtotal + delivery
 
   if (cartItems.length === 0) {
     return (
       <main className="screen screen--cart has-bottom-nav">
-        <PageHeader title="Корзина" showCart={false} />
+        <PageHeader title="Корзина" showCart={false} backTo="/" />
         <div className="empty-cart">
           <span>
             <ShoppingBag aria-hidden="true" />
           </span>
           <h2>Корзина пока пуста</h2>
-          <p>Добавьте блюда собственного производства или любимые продукты</p>
+          <p>Добавьте готовые блюда или любимые продукты из каталога</p>
           <button
             type="button"
             className="primary-button"
-            onClick={() => navigate('/category/own-production')}
+            onClick={() => navigate('/catalog')}
           >
             Перейти в каталог
           </button>
@@ -56,9 +40,18 @@ export function CartPage() {
     )
   }
 
+  const freeDeliveryRemainder = Math.max(
+    0,
+    DEMO_RULES.freeDeliveryFrom - totals.merchandiseSubtotal,
+  )
+  const minimumRemainder = Math.max(
+    0,
+    DEMO_RULES.minimumOrder - totals.merchandiseSubtotal,
+  )
+
   return (
     <main className="screen screen--cart has-bottom-nav has-cart-checkout">
-      <PageHeader title="Корзина" showCart={false} />
+      <PageHeader title="Корзина" showCart={false} backTo="/" />
 
       <section className="cart-items" aria-label="Товары в корзине">
         {cartItems.map(({ product, quantity }) => (
@@ -66,17 +59,30 @@ export function CartPage() {
             <button
               type="button"
               className="cart-item__image"
-              onClick={() => navigate(`/product/${product.id}`)}
+              onClick={() =>
+                navigate(`/product/${product.id}`, { state: { from: '/cart' } })
+              }
               aria-label={`Открыть товар «${product.name}»`}
             >
-              <img src={product.image} alt="" />
+              <img
+                src={product.image}
+                alt=""
+                width="600"
+                height="600"
+                loading="lazy"
+                decoding="async"
+              />
             </button>
             <div className="cart-item__content">
               <div className="cart-item__topline">
                 <button
                   type="button"
                   className="cart-item__name"
-                  onClick={() => navigate(`/product/${product.id}`)}
+                  onClick={() =>
+                    navigate(`/product/${product.id}`, {
+                      state: { from: '/cart' },
+                    })
+                  }
                 >
                   {product.name}
                 </button>
@@ -111,50 +117,62 @@ export function CartPage() {
         ))}
       </section>
 
-      {currentSubtotal < 1500 && (
+      {freeDeliveryRemainder > 0 && (
         <div className="free-delivery-card">
           <Truck aria-hidden="true" />
           <div>
             <span>
-              Ещё {formatPrice(1500 - currentSubtotal)} ₽ до бесплатной доставки
+              Ещё {formatPrice(freeDeliveryRemainder)} ₽ до бесплатной доставки
             </span>
             <div>
-              <i style={{ width: `${Math.min((currentSubtotal / 1500) * 100, 100)}%` }} />
+              <i
+                style={{
+                  width: `${Math.min(
+                    (totals.merchandiseSubtotal /
+                      DEMO_RULES.freeDeliveryFrom) *
+                      100,
+                    100,
+                  )}%`,
+                }}
+              />
             </div>
           </div>
         </div>
       )}
 
-      <button type="button" className="bonus-spend-row">
+      <div className="bonus-spend-row" aria-label="Доступные бонусы">
         <span className="bonus-spend-row__icon">
           <Gift aria-hidden="true" />
         </span>
         <span>
           <small>Доступно</small>
-          <strong>2 480 бонусов</strong>
+          <strong>{formatPrice(bonusBalance)} бонусов</strong>
         </span>
-        <span>Списать на оформлении</span>
-        <ChevronRight aria-hidden="true" />
-      </button>
+        <span>Можно применить при оформлении</span>
+      </div>
 
       <section className="order-summary" aria-labelledby="summary-title">
         <h2 id="summary-title">Сумма заказа</h2>
         <dl>
           <div>
             <dt>Товары</dt>
-            <dd>{formatPrice(baseSubtotal)} ₽</dd>
+            <dd>{formatPrice(totals.listSubtotal)} ₽</dd>
           </div>
           <div className="order-summary__discount">
-            <dt>Скидка</dt>
-            <dd>−{formatPrice(discount)} ₽</dd>
+            <dt>Скидка на товары</dt>
+            <dd>−{formatPrice(totals.productDiscount)} ₽</dd>
           </div>
           <div>
             <dt>Доставка</dt>
-            <dd>{delivery === 0 ? 'Бесплатно' : `${formatPrice(delivery)} ₽`}</dd>
+            <dd>
+              {totals.deliveryFee === 0
+                ? 'Бесплатно'
+                : `${formatPrice(totals.deliveryFee)} ₽`}
+            </dd>
           </div>
           <div className="order-summary__total">
             <dt>Итого</dt>
-            <dd>{formatPrice(total)} ₽</dd>
+            <dd>{formatPrice(totals.payableTotal)} ₽</dd>
           </div>
         </dl>
       </section>
@@ -165,20 +183,20 @@ export function CartPage() {
       </p>
 
       <AppPortal>
-        {showNotice && (
-          <div className="stage-notice" role="status">
-            Оформление появится на следующем этапе
-          </div>
-        )}
         <div className="cart-checkout-bar">
           <span>
-            <small>Итого</small>
-            <strong>{formatPrice(total)} ₽</strong>
+            <small>
+              {minimumRemainder > 0
+                ? `Ещё ${formatPrice(minimumRemainder)} ₽ до минимума`
+                : formatProductCount(totals.itemCount)}
+            </small>
+            <strong>{formatPrice(totals.payableTotal)} ₽</strong>
           </span>
           <button
             type="button"
             className="primary-button"
-            onClick={() => setShowNotice(true)}
+            disabled={!totals.minimumOrderReached}
+            onClick={() => navigate('/checkout')}
           >
             Перейти к оформлению
           </button>

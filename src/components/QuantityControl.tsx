@@ -1,4 +1,5 @@
 import { Minus, Plus } from 'lucide-react'
+import { DEMO_RULES } from '../config/demoRules'
 
 type QuantityControlProps = {
   quantity: number
@@ -21,6 +22,7 @@ export function QuantityControl({
       <button
         type="button"
         aria-label="Уменьшить количество"
+        disabled={quantity <= 0}
         onClick={() => onChange(quantity - 1)}
       >
         <Minus aria-hidden="true" />
@@ -29,6 +31,7 @@ export function QuantityControl({
       <button
         type="button"
         aria-label="Увеличить количество"
+        disabled={quantity >= DEMO_RULES.maxCartQuantity}
         onClick={() => onChange(quantity + 1)}
       >
         <Plus aria-hidden="true" />

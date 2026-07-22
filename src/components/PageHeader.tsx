@@ -6,12 +6,14 @@ type PageHeaderProps = {
   title: string
   backTo?: string
   showCart?: boolean
+  onBack?: () => void
 }
 
 export function PageHeader({
   title,
-  backTo = '/',
+  backTo,
   showCart = true,
+  onBack,
 }: PageHeaderProps) {
   const navigate = useNavigate()
   const { cartCount } = useShop()
@@ -22,7 +24,11 @@ export function PageHeader({
         type="button"
         className="icon-button"
         aria-label="Назад"
-        onClick={() => navigate(backTo)}
+        onClick={() => {
+          if (onBack) onBack()
+          else if (backTo) navigate(backTo)
+          else navigate(-1)
+        }}
       >
         <ArrowLeft aria-hidden="true" />
       </button>

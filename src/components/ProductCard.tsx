@@ -1,6 +1,5 @@
 import { Heart, Plus } from 'lucide-react'
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useShop } from '../context/ShopContext'
 import { discountPercent, formatPrice } from '../lib/format'
 import type { Product } from '../types'
@@ -9,23 +8,38 @@ import { QuantityControl } from './QuantityControl'
 type ProductCardProps = {
   product: Product
   variant?: 'grid' | 'rail'
+  onOpen?: () => void
 }
 
-export function ProductCard({ product, variant = 'grid' }: ProductCardProps) {
-  const { cart, setQuantity } = useShop()
-  const [isFavorite, setFavorite] = useState(false)
+export function ProductCard({
+  product,
+  variant = 'grid',
+  onOpen,
+}: ProductCardProps) {
+  const { cart, setQuantity, isFavorite, toggleFavorite } = useShop()
+  const location = useLocation()
   const quantity = cart[product.id] ?? 0
   const discount = discountPercent(product.price, product.oldPrice)
+  const favorite = isFavorite(product.id)
 
   return (
     <article className={`product-card product-card--${variant}`}>
       <div className="product-card__visual">
         <Link
           to={`/product/${product.id}`}
+          state={{ from: `${location.pathname}${location.search}` }}
           className="product-card__image-link"
           aria-label={`Открыть товар «${product.name}»`}
+          onClick={onOpen}
         >
-          <img src={product.image} alt={product.name} loading="lazy" />
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            width="600"
+            height="600"
+          />
         </Link>
         {product.ownProduction && (
           <span className="product-card__badge">Наше производство</span>
@@ -35,10 +49,10 @@ export function ProductCard({ product, variant = 'grid' }: ProductCardProps) {
         )}
         <button
           type="button"
-          className={`favorite-button${isFavorite ? ' is-active' : ''}`}
-          aria-label={isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'}
-          aria-pressed={isFavorite}
-          onClick={() => setFavorite((current) => !current)}
+          className={`favorite-button${favorite ? ' is-active' : ''}`}
+          aria-label={favorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+          aria-pressed={favorite}
+          onClick={() => toggleFavorite(product.id)}
         >
           <Heart aria-hidden="true" />
         </button>
@@ -48,7 +62,12 @@ export function ProductCard({ product, variant = 'grid' }: ProductCardProps) {
       </div>
 
       <div className="product-card__body">
-        <Link to={`/product/${product.id}`} className="product-card__name">
+        <Link
+          to={`/product/${product.id}`}
+          state={{ from: `${location.pathname}${location.search}` }}
+          className="product-card__name"
+          onClick={onOpen}
+        >
           {product.name}
         </Link>
         <span className="product-card__weight">{product.weight}</span>

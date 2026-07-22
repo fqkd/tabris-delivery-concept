@@ -6,19 +6,19 @@ import {
   Leaf,
   ShoppingBag,
 } from 'lucide-react'
-import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AppPortal } from '../components/AppPortal'
 import { QuantityControl } from '../components/QuantityControl'
 import { useShop } from '../context/ShopContext'
 import { getProduct } from '../data/products'
+import { calculateProductBonus } from '../lib/cart'
 import { discountPercent, formatPrice } from '../lib/format'
 
 export function ProductPage() {
   const { productId } = useParams()
   const navigate = useNavigate()
-  const { cart, setQuantity, cartCount } = useShop()
-  const [isFavorite, setFavorite] = useState(false)
+  const location = useLocation()
+  const { cart, setQuantity, cartCount, isFavorite, toggleFavorite } = useShop()
   const product = productId ? getProduct(productId) : undefined
 
   if (!product) {
@@ -34,30 +34,41 @@ export function ProductPage() {
 
   const quantity = cart[product.id] ?? 0
   const discount = discountPercent(product.price, product.oldPrice)
+  const favorite = isFavorite(product.id)
+  const bonus = calculateProductBonus(product)
+  const sourcePath = (location.state as { from?: string } | null)?.from
 
   return (
     <>
       <main className="screen screen--product">
       <div className="product-hero">
-        <img src={product.image} alt={product.name} />
+        <img
+          src={product.image}
+          alt={product.name}
+          width="600"
+          height="600"
+          decoding="async"
+        />
         <div className="product-hero__actions">
           <button
             type="button"
             className="icon-button icon-button--surface"
             aria-label="Вернуться в каталог"
-            onClick={() => navigate('/category/own-production')}
+            onClick={() =>
+              sourcePath ? navigate(sourcePath) : navigate('/catalog')
+            }
           >
             <ArrowLeft aria-hidden="true" />
           </button>
           <span>
             <button
               type="button"
-              className={`icon-button icon-button--surface${isFavorite ? ' is-active' : ''}`}
+              className={`icon-button icon-button--surface${favorite ? ' is-active' : ''}`}
               aria-label={
-                isFavorite ? 'Убрать из избранного' : 'Добавить в избранное'
+                favorite ? 'Убрать из избранного' : 'Добавить в избранное'
               }
-              aria-pressed={isFavorite}
-              onClick={() => setFavorite((current) => !current)}
+              aria-pressed={favorite}
+              onClick={() => toggleFavorite(product.id)}
             >
               <Heart aria-hidden="true" />
             </button>
@@ -114,8 +125,12 @@ export function ProductPage() {
         <div className="bonus-accrual">
           <Award aria-hidden="true" />
           <span>
-            <small>Начислим за покупку</small>
-            <strong>+{product.bonus} бонусов</strong>
+            <small>{bonus > 0 ? 'Начислим за покупку' : 'Табрис Бонус'}</small>
+            <strong>
+              {bonus > 0
+                ? `+${bonus} бонусов`
+                : 'За акционный товар бонусы не начисляются'}
+            </strong>
           </span>
         </div>
 

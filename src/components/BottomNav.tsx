@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useShop } from '../context/ShopContext'
+import { formatProductCount } from '../lib/format'
 
 type NavItem = {
   label: string
@@ -25,15 +26,16 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Каталог',
-    path: '/category/own-production',
+    path: '/catalog',
     icon: LayoutGrid,
-    isActive: (pathname) => pathname.startsWith('/category'),
+    isActive: (pathname) =>
+      pathname === '/catalog' || pathname.startsWith('/category'),
   },
   {
     label: 'Избранное',
-    path: '/section/favorites',
+    path: '/favorites',
     icon: Heart,
-    isActive: (pathname) => pathname === '/section/favorites',
+    isActive: (pathname) => pathname === '/favorites',
   },
   {
     label: 'Корзина',
@@ -43,9 +45,10 @@ const navItems: NavItem[] = [
   },
   {
     label: 'Профиль',
-    path: '/section/profile',
+    path: '/profile',
     icon: UserRound,
-    isActive: (pathname) => pathname === '/section/profile',
+    isActive: (pathname) =>
+      pathname === '/profile' || pathname === '/bonus',
   },
 ]
 
@@ -66,12 +69,20 @@ export function BottomNav() {
             type="button"
             className={active ? 'is-active' : undefined}
             aria-current={active ? 'page' : undefined}
+            aria-label={
+              item.path === '/cart' && cartCount > 0
+                ? `Корзина, ${formatProductCount(cartCount)}`
+                : item.label
+            }
             onClick={() => navigate(item.path)}
           >
             <span className="bottom-nav__icon">
               <Icon aria-hidden="true" />
               {item.path === '/cart' && cartCount > 0 && (
-                <span className="bottom-nav__badge" aria-label={`${cartCount} товаров`}>
+                <span
+                  className="bottom-nav__badge"
+                  aria-hidden="true"
+                >
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
