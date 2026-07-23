@@ -115,9 +115,11 @@ export const shopReducer = (
   }
 
   if (action.type === 'SET_SEARCH_SCROLL') {
+    const scrollTop = Math.max(0, action.scrollTop)
+    if (state.search.scrollTop === scrollTop) return state
     return {
       ...state,
-      search: { ...state.search, scrollTop: Math.max(0, action.scrollTop) },
+      search: { ...state.search, scrollTop },
     }
   }
 

@@ -104,22 +104,13 @@ export function CatalogPage() {
     const state = location.state as
       | {
           scrollToCatalogResults?: boolean
-          scrollToCatalogTop?: boolean
         }
       | null
-    if (state?.scrollToCatalogTop) {
-      document
-        .querySelector<HTMLElement>('.app-scroll')
-        ?.scrollTo({ top: 0 })
-      setSearchScrollTop(0)
-      navigate('/catalog', { replace: true, state: null })
-      return
-    }
     if (!state?.scrollToCatalogResults) return
 
     resultsHeadingRef.current?.scrollIntoView({ block: 'start' })
     navigate('/catalog', { replace: true, state: null })
-  }, [location.state, navigate, setSearchScrollTop])
+  }, [location.state, navigate])
 
   const toggleFilter = (filter: keyof Pick<
     CatalogFilters,
@@ -177,7 +168,11 @@ export function CatalogPage() {
             </button>
             <button
               type="button"
-              onClick={() => navigate('/catalog/categories')}
+              onClick={() =>
+                navigate('/catalog/categories', {
+                  state: { fromCatalog: true },
+                })
+              }
             >
               Все категории ({catalogCategories.length})
             </button>
