@@ -1,4 +1,5 @@
 import {
+  Bike,
   Check,
   ChevronDown,
   Clock3,
@@ -6,12 +7,9 @@ import {
   Home,
   MapPin,
   Navigation,
-  PackageCheck,
   PackageOpen,
   ShoppingBag,
   Smartphone,
-  Store,
-  Truck,
 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
@@ -19,15 +17,7 @@ import { useShop } from '../context/ShopContext'
 import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice, formatProductCount } from '../lib/format'
 import { buildTrackingTimeline } from '../lib/order'
-import type { OrderStatus, PaymentMethod } from '../types'
-
-const statusLabels: Record<OrderStatus, string> = {
-  placed: 'Заказ оформлен',
-  assembling: 'Собираем заказ',
-  courier: 'Передали курьеру',
-  delivering: 'Доставляем',
-  delivered: 'Заказ доставлен',
-}
+import type { PaymentMethod } from '../types'
 
 const paymentLabels: Record<PaymentMethod, string> = {
   card: 'Банковская карта',
@@ -72,10 +62,11 @@ export function TrackingPage() {
 
   const order = lastOrder
   const deliveryDate = formatSavedDeliveryDate(order.deliverySlot)
-  const timeline = buildTrackingTimeline(order)
+  const timeline = buildTrackingTimeline({
+    ...order,
+    status: 'delivering',
+  })
   const PaymentIcon = order.paymentMethod === 'card' ? CreditCard : Smartphone
-  const showCourierMarker =
-    order.status === 'courier' || order.status === 'delivering'
 
   return (
     <main className="screen screen--tracking">
@@ -88,11 +79,11 @@ export function TrackingPage() {
 
       <section className="tracking-status" aria-labelledby="tracking-status-title">
         <span className="tracking-status__icon">
-          <PackageCheck aria-hidden="true" />
+          <Bike aria-hidden="true" />
         </span>
-        <span className="tracking-status__eyebrow">Текущий статус</span>
-        <h1 id="tracking-status-title">{statusLabels[order.status]}</h1>
-        <p>Бережно подбираем свежие продукты и готовые блюда.</p>
+        <span className="tracking-status__eyebrow">Заказ в пути</span>
+        <h1 id="tracking-status-title">Курьер едет к вам</h1>
+        <p>Заказ уже покинул магазин и движется к адресу доставки.</p>
         <div className="tracking-status__eta">
           <Clock3 aria-hidden="true" />
           <span>
@@ -128,39 +119,23 @@ export function TrackingPage() {
       <section className="tracking-route" aria-labelledby="route-title">
         <div className="tracking-route__heading">
           <div>
-            <h2 id="route-title">Условная схема маршрута</h2>
-            <p>Не отображает реальное положение курьера</p>
+            <span>Демо-маршрут</span>
+            <h2 id="route-title">Маршрут доставки</h2>
+            <p>Позиция обновлена 2 минуты назад</p>
           </div>
           <Navigation aria-hidden="true" />
         </div>
-        <div
-          className="route-schematic"
-          role="img"
-          aria-label={
-            showCourierMarker
-              ? 'Условная схема от магазина к адресу с демонстрационной отметкой курьера'
-              : 'Условная схема от магазина к адресу; положение курьера пока не показывается'
-          }
-        >
-          <i className="route-schematic__road route-schematic__road--one" />
-          <i className="route-schematic__road route-schematic__road--two" />
-          <i className="route-schematic__road route-schematic__road--three" />
-          <span className="route-schematic__origin" aria-hidden="true">
-            <Store />
+        <div className="tracking-map-card">
+          <img
+            src="/images/maps/courier-delivery-route.png"
+            alt="Демонстрационная карта маршрута курьера от магазина к адресу доставки"
+            width="1536"
+            height="1024"
+            decoding="async"
+          />
+          <span className="tracking-map-card__eta">
+            Будет через 12–18 минут
           </span>
-          <span className="route-schematic__destination" aria-hidden="true">
-            <MapPin />
-          </span>
-          {showCourierMarker && (
-            <span className="route-schematic__courier" aria-hidden="true">
-              <Truck />
-            </span>
-          )}
-          {!showCourierMarker && (
-            <span className="route-schematic__pending">
-              Маршрут уточнится после сборки
-            </span>
-          )}
         </div>
         <div className="tracking-address">
           <MapPin aria-hidden="true" />

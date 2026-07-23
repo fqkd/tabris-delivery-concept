@@ -1722,7 +1722,57 @@ a {
   font-weight: 700;
 }
 
-.select-field,
+.city-picker {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.city-picker__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.city-picker__options button {
+  min-width: 0;
+  min-height: var(--control-height);
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr) 15px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  color: var(--graphite);
+  background: var(--surface-soft);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: left;
+}
+
+.city-picker__options button > svg {
+  width: 16px;
+  height: 16px;
+  color: var(--green-700);
+}
+
+.city-picker__options button > svg:last-child {
+  width: 14px;
+  height: 14px;
+  justify-self: end;
+  stroke-width: 3;
+}
+
+.city-picker__options button.is-selected {
+  border-color: #91b96a;
+  color: var(--green-950);
+  background: var(--green-100);
+  box-shadow: 0 0 0 2px rgba(118, 184, 41, 0.12);
+}
+
 .text-field {
   min-height: 48px;
   display: grid;
@@ -1741,13 +1791,11 @@ a {
   grid-template-columns: 20px minmax(0, 1fr);
 }
 
-.select-field svg,
 .text-field svg {
   width: 18px;
   height: 18px;
 }
 
-.select-field select,
 .text-field input {
   width: 100%;
   min-width: 0;
@@ -1759,14 +1807,6 @@ a {
   background: transparent;
   font-size: 14px;
   font-weight: 600;
-}
-
-.select-field select {
-  appearance: none;
-}
-
-.select-field svg:last-child {
-  color: var(--muted);
 }
 
 .saved-address {
@@ -3811,7 +3851,7 @@ fieldset.checkout-section {
   line-height: 1.3;
 }
 
-.tracking-timeline li.is-pending .tracking-timeline__content {
+.tracking-timeline li.is-upcoming .tracking-timeline__content {
   opacity: 0.56;
 }
 
@@ -3839,10 +3879,20 @@ fieldset.checkout-section {
   margin-bottom: 3px;
 }
 
+.tracking-route__heading > div > span {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--green-700);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.045em;
+}
+
 .tracking-route__heading p {
   margin: 0;
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11px;
+  line-height: 1.4;
 }
 
 .tracking-route__heading > svg {
@@ -3852,109 +3902,41 @@ fieldset.checkout-section {
   color: var(--green-700);
 }
 
-.route-schematic {
+.tracking-map-card {
   position: relative;
-  height: 176px;
+  width: 100%;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   border: 1px solid #dce6d3;
   border-radius: 14px;
-  background-color: #eef3e9;
-  background-image:
-    linear-gradient(rgba(87, 133, 40, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(87, 133, 40, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background: var(--surface);
+  box-shadow: 0 6px 20px rgba(29, 54, 0, 0.06);
 }
 
-.route-schematic__road {
+.tracking-map-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: var(--surface);
+}
+
+.tracking-map-card__eta {
   position: absolute;
-  display: block;
-  height: 13px;
-  border: 4px solid white;
-  border-right: 0;
-  border-left: 0;
-  border-radius: 10px;
-  background: #cbd1c5;
-  box-shadow: 0 1px 2px rgba(29, 54, 0, 0.12);
-}
-
-.route-schematic__road--one {
-  top: 72px;
-  left: -26px;
-  width: 260px;
-  transform: rotate(-13deg);
-}
-
-.route-schematic__road--two {
-  top: 108px;
-  right: -40px;
-  width: 260px;
-  transform: rotate(18deg);
-}
-
-.route-schematic__road--three {
-  top: 24px;
-  right: 62px;
-  width: 150px;
-  transform: rotate(68deg);
-}
-
-.route-schematic__origin,
-.route-schematic__destination,
-.route-schematic__courier {
-  position: absolute;
-  z-index: 3;
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border: 3px solid white;
-  border-radius: 50%;
-  color: white;
-  box-shadow: 0 4px 12px rgba(29, 54, 0, 0.2);
-}
-
-.route-schematic__origin {
-  left: 24px;
-  bottom: 24px;
-  background: var(--green-950);
-}
-
-.route-schematic__destination {
-  top: 20px;
-  right: 24px;
-  background: var(--sale);
-}
-
-.route-schematic__courier {
-  top: 72px;
-  left: 49%;
-  width: 34px;
-  height: 34px;
-  background: var(--green-500);
-}
-
-.route-schematic__origin svg,
-.route-schematic__destination svg,
-.route-schematic__courier svg {
-  width: 17px;
-  height: 17px;
-}
-
-.route-schematic__pending {
-  position: absolute;
-  z-index: 4;
+  z-index: 1;
+  top: 10px;
   left: 50%;
-  bottom: 15px;
   width: max-content;
-  max-width: calc(100% - 30px);
+  max-width: calc(100% - 24px);
   transform: translateX(-50%);
-  padding: 7px 9px;
-  border-radius: 8px;
-  color: var(--green-950);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 3px 10px rgba(29, 54, 0, 0.08);
-  font-size: 9px;
-  font-weight: 750;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 10px;
+  color: white;
+  background: rgba(29, 54, 0, 0.92);
+  box-shadow: 0 5px 16px rgba(29, 54, 0, 0.18);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.25;
   text-align: center;
 }
 
@@ -4842,7 +4824,7 @@ fieldset.checkout-section {
 .screen--tabris-bonus small,
 .screen--tracking .tracking-timeline__time,
 .screen--tracking .tracking-route__heading p,
-.screen--tracking .route-schematic__pending,
+.screen--tracking .tracking-map-card__eta,
 .screen--profile .profile-section__heading > div > span,
 .screen--profile .profile-order-card__meta,
 .screen--profile .profile-empty-state p,
