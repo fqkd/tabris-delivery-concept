@@ -1,4 +1,11 @@
-import { useEffect, useMemo, useReducer, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useState,
+  type ReactNode,
+} from 'react'
 import { getCartItemCount } from '../lib/cart'
 import { loadPersistedState, savePersistedState } from '../lib/storage'
 import { ShopContext } from './ShopContext'
@@ -29,6 +36,12 @@ export function ShopProvider({ children }: ShopProviderProps) {
     savePersistedState(state)
   }, [state])
 
+  const setSearchScrollTop = useCallback(
+    (scrollTop: number) =>
+      dispatch({ type: 'SET_SEARCH_SCROLL', scrollTop }),
+    [],
+  )
+
   const value = useMemo(
     () => ({
       ...state,
@@ -58,8 +71,7 @@ export function ShopProvider({ children }: ShopProviderProps) {
         dispatch({ type: 'SET_SEARCH_FILTERS', filters }),
       setSearchSort: (sort: CatalogSort) =>
         dispatch({ type: 'SET_SEARCH_SORT', sort }),
-      setSearchScrollTop: (scrollTop: number) =>
-        dispatch({ type: 'SET_SEARCH_SCROLL', scrollTop }),
+      setSearchScrollTop,
       resetSearch: () => dispatch({ type: 'RESET_SEARCH' }),
       setElectronicReceipts: (enabled: boolean) =>
         dispatch({ type: 'SET_ELECTRONIC_RECEIPTS', enabled }),
@@ -68,7 +80,7 @@ export function ShopProvider({ children }: ShopProviderProps) {
       clearOrderedCart: (orderId: string) =>
         dispatch({ type: 'CLEAR_ORDERED_CART', orderId }),
     }),
-    [isAddressOpen, state],
+    [isAddressOpen, setSearchScrollTop, state],
   )
 
   return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>

@@ -1,6 +1,6 @@
 import { Check } from 'lucide-react'
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { useShop } from '../context/ShopContext'
 import { catalogCategories } from '../data/catalogCategories'
@@ -10,6 +10,7 @@ import { formatProductCount } from '../lib/format'
 import type { ProductCategoryId } from '../types'
 
 export function CatalogCategoriesPage() {
+  const location = useLocation()
   const navigate = useNavigate()
   const {
     search,
@@ -35,11 +36,14 @@ export function CatalogCategoriesPage() {
   }
 
   const returnToCatalog = () => {
+    const state = location.state as { fromCatalog?: boolean } | null
+    if (state?.fromCatalog) {
+      navigate(-1)
+      return
+    }
+
     setSearchScrollTop(0)
-    navigate('/catalog', {
-      replace: true,
-      state: { scrollToCatalogTop: true },
-    })
+    navigate('/catalog', { replace: true })
   }
 
   return (
