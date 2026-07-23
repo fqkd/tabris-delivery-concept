@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useShop } from '../context/ShopContext'
+import { getNearestDeliveryTimeLabel } from '../lib/deliveryDates'
 
 export function AddressSheet() {
   const {
@@ -16,20 +17,21 @@ export function AddressSheet() {
     closeAddress,
     confirmAddress,
   } = useShop()
-  const [city, setCity] = useState(address.city)
-  const [street, setStreet] = useState(address.street)
+  const [city, setCity] = useState(address?.city ?? 'Краснодар')
+  const [street, setStreet] = useState(address?.street ?? '')
   const dialogRef = useRef<HTMLElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const nearestDeliveryTime = getNearestDeliveryTimeLabel()
 
   useEffect(() => {
     if (isAddressOpen) {
-      setCity(address.city)
-      setStreet(address.street)
+      setCity(address?.city ?? 'Краснодар')
+      setStreet(address?.street ?? '')
       previousFocusRef.current = document.activeElement as HTMLElement | null
       window.requestAnimationFrame(() => inputRef.current?.focus())
     }
-  }, [address.city, address.street, isAddressOpen])
+  }, [address?.city, address?.street, isAddressOpen])
 
   useEffect(() => {
     if (!isAddressOpen) return
@@ -148,7 +150,7 @@ export function AddressSheet() {
           <Clock3 aria-hidden="true" />
           <span>
             <small>Ближайшая доставка</small>
-            <strong>{address.deliveryTime}</strong>
+            <strong>{nearestDeliveryTime}</strong>
           </span>
         </div>
 
@@ -160,7 +162,7 @@ export function AddressSheet() {
             confirmAddress({
               city,
               street: street.trim(),
-              deliveryTime: address.deliveryTime,
+              deliveryTime: nearestDeliveryTime,
             })
           }
         >

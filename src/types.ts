@@ -1,11 +1,25 @@
 export type ProductCategoryId =
-  | 'ready'
-  | 'salads'
-  | 'bakery'
-  | 'desserts'
+  | 'own-production'
+  | 'fruit-vegetables'
+  | 'dairy'
   | 'cheese'
-  | 'fish'
+  | 'meat-poultry-eggs'
+  | 'fish-delicacies'
+  | 'meat-gastronomy'
+  | 'frozen-semi-finished'
   | 'drinks'
+  | 'alcohol'
+  | 'grocery-canned'
+  | 'snacks-dried-fruit-nuts'
+  | 'sweets-cookies-chocolate'
+  | 'bread-snacks-dough'
+  | 'kids'
+  | 'healthy-food'
+  | 'coffee-tea-cocoa'
+  | 'household'
+  | 'cosmetics-hygiene'
+  | 'pets'
+  | 'stationery'
 
 export type Product = {
   id: string
@@ -19,19 +33,14 @@ export type Product = {
   shelfLife: string
   ownProduction: boolean
   unavailable?: boolean
+  ageRestricted?: boolean
+  bonusAccrualExcluded?: boolean
+  bonusRedemptionExcluded?: boolean
   categoryId: ProductCategoryId
   typeLabel: string
   keywords: string[]
   popularity: number
-  subcategory:
-    | 'Салаты'
-    | 'Горячее'
-    | 'Выпечка'
-    | 'Десерты'
-    | 'Роллы'
-    | 'Сыры'
-    | 'Рыба'
-    | 'Напитки'
+  subcategory: string
 }
 
 export type DeliveryAddress = {
@@ -75,6 +84,7 @@ export type DemoProfile = {
 
 export type DeliverySlot = {
   id: string
+  dateKey: string
   dayLabel: string
   dateLabel: string
   timeLabel: string
@@ -133,13 +143,13 @@ export type OrderSnapshot = {
 export type PersistedShopState = {
   cart: CartState
   favoriteIds: string[]
-  address: DeliveryAddress
-  addressConfirmed: boolean
+  address: DeliveryAddress | null
   search: SearchState
   profile: DemoProfile
   electronicReceipts: boolean
   bonusBalance: number
   lastOrder: OrderSnapshot | null
+  pendingCartClearOrderId: string | null
 }
 
 export type DinnerSetItem = {

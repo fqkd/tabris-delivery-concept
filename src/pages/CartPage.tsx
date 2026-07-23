@@ -1,4 +1,4 @@
-import { Gift, ShoppingBag, Trash2, Truck } from 'lucide-react'
+import { Gift, MapPin, ShoppingBag, Trash2, Truck } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppPortal } from '../components/AppPortal'
@@ -11,17 +11,35 @@ import { formatPrice, formatProductCount } from '../lib/format'
 
 export function CartPage() {
   const navigate = useNavigate()
-  const { cart, setQuantity, removeFromCart, bonusBalance } = useShop()
+  const {
+    address,
+    bonusBalance,
+    cart,
+    openAddress,
+    removeFromCart,
+    setQuantity,
+  } = useShop()
   const cartItems = useMemo(() => getCartItems(cart), [cart])
   const totals = useMemo(
     () => calculateOrderTotals(cart, 0, bonusBalance),
     [bonusBalance, cart],
+  )
+  const addressControl = (
+    <button type="button" className="cart-address" onClick={openAddress}>
+      <MapPin aria-hidden="true" />
+      <span>
+        <small>Адрес доставки</small>
+        <strong>{address?.street ?? 'Выберите адрес'}</strong>
+      </span>
+      <span>{address ? 'Изменить' : 'Выбрать'}</span>
+    </button>
   )
 
   if (cartItems.length === 0) {
     return (
       <main className="screen screen--cart has-bottom-nav">
         <PageHeader title="Корзина" showCart={false} backTo="/" />
+        {addressControl}
         <div className="empty-cart">
           <span>
             <ShoppingBag aria-hidden="true" />
@@ -52,6 +70,7 @@ export function CartPage() {
   return (
     <main className="screen screen--cart has-bottom-nav has-cart-checkout">
       <PageHeader title="Корзина" showCart={false} backTo="/" />
+      {addressControl}
 
       <section className="cart-items" aria-label="Товары в корзине">
         {cartItems.map(({ product, quantity }) => (

@@ -1,5 +1,11 @@
 import { DEMO_RULES, favoriteCategoryIds } from '../config/demoRules'
 import { products } from '../data/products'
+import {
+  calculateEarnedBonus,
+  calculateMaximumBonusSpend,
+  clampBonusSpend,
+  type BonusCalculationLine,
+} from './bonus'
 import type { CartAddition, CartState, OrderTotals, Product } from '../types'
 
 export type CartItem = {
@@ -47,40 +53,41 @@ export const mergeCartAdditions = (
 export const isSaleProduct = (product: Product) =>
   typeof product.oldPrice === 'number' && product.oldPrice > product.price
 
-export const calculateProductBonus = (product: Product, quantity = 1) => {
-  if (isSaleProduct(product)) return 0
-
-  const rate = favoriteCategoryIds.includes(product.categoryId)
+const productToBonusLine = (
+  product: Product,
+  quantity: number,
+): BonusCalculationLine => ({
+  amount: product.price * normalizeQuantity(quantity),
+  accrualRate: favoriteCategoryIds.includes(product.categoryId)
     ? DEMO_RULES.bonusFavoriteRate
-    : DEMO_RULES.bonusBaseRate
+    : DEMO_RULES.bonusBaseRate,
+  accrualEligible:
+    !isSaleProduct(product) && !product.bonusAccrualExcluded,
+  redemptionEligible: !product.bonusRedemptionExcluded,
+})
 
-  return Math.floor(product.price * normalizeQuantity(quantity) * rate)
+const cartToBonusLines = (cart: CartState) =>
+  getCartItems(cart).map(({ product, quantity }) =>
+    productToBonusLine(product, quantity),
+  )
+
+export const calculateProductBonus = (product: Product, quantity = 1) => {
+  return calculateEarnedBonus([productToBonusLine(product, quantity)])
 }
 
-export const calculateBonusEarned = (cart: CartState) =>
-  getCartItems(cart).reduce(
-    (sum, item) =>
-      sum + calculateProductBonus(item.product, item.quantity),
-    0,
-  )
+export const calculateBonusEarned = (
+  cart: CartState,
+  bonusSpent = 0,
+) => calculateEarnedBonus(cartToBonusLines(cart), bonusSpent)
 
 export const calculateMaxBonusSpend = (
   cart: CartState,
   availableBalance: number,
 ) => {
-  const items = getCartItems(cart)
-  const merchandiseSubtotal = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0,
-  )
-  const requiredCash = items.reduce((sum, item) => sum + item.quantity, 0)
-
-  return Math.max(
-    0,
-    Math.min(
-      Math.floor(Math.max(0, availableBalance)),
-      Math.floor(merchandiseSubtotal - requiredCash),
-    ),
+  return calculateMaximumBonusSpend(
+    cartToBonusLines(cart),
+    availableBalance,
+    DEMO_RULES.minimumCashPayment,
   )
 }
 
@@ -106,10 +113,7 @@ export const calculateOrderTotals = (
       ? 0
       : DEMO_RULES.deliveryFee
   const maxBonusSpend = calculateMaxBonusSpend(cart, availableBonusBalance)
-  const bonusSpent = Math.max(
-    0,
-    Math.min(maxBonusSpend, Math.floor(requestedBonusSpend)),
-  )
+  const bonusSpent = clampBonusSpend(requestedBonusSpend, maxBonusSpend)
 
   return {
     listSubtotal,
@@ -118,7 +122,7 @@ export const calculateOrderTotals = (
     deliveryFee,
     bonusSpent,
     payableTotal: merchandiseSubtotal + deliveryFee - bonusSpent,
-    bonusEarned: calculateBonusEarned(cart),
+    bonusEarned: calculateBonusEarned(cart, bonusSpent),
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
     minimumOrderReached: merchandiseSubtotal >= DEMO_RULES.minimumOrder,
   }

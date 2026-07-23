@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 import {
   BrowserRouter,
   Navigate,
@@ -34,6 +34,38 @@ const bottomNavPaths = new Set([
   '/bonus',
   '/dinner',
 ])
+
+const getPageTitle = (pathname: string) => {
+  if (pathname === '/') return 'Главная — доставка «Табрис»'
+  if (pathname === '/catalog') return 'Каталог — доставка «Табрис»'
+  if (pathname === '/cart') return 'Корзина — доставка «Табрис»'
+  if (pathname === '/checkout') return 'Оформление — доставка «Табрис»'
+  if (/^\/orders\/[^/]+\/success$/.test(pathname)) {
+    return 'Заказ оформлен — доставка «Табрис»'
+  }
+  if (/^\/orders\/[^/]+\/tracking$/.test(pathname)) {
+    return 'Отслеживание заказа — доставка «Табрис»'
+  }
+  if (pathname === '/profile') return 'Профиль — доставка «Табрис»'
+  if (pathname === '/favorites') return 'Избранное — доставка «Табрис»'
+  if (pathname === '/bonus') return 'Табрис Бонус — концепт'
+  if (pathname === '/dinner') return 'Собрать ужин — доставка «Табрис»'
+  if (pathname === '/category/own-production') {
+    return 'Наше производство — доставка «Табрис»'
+  }
+  if (pathname.startsWith('/product/')) return 'Товар — доставка «Табрис»'
+  return 'Доставка «Табрис» — концепт'
+}
+
+function DocumentTitle() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    document.title = getPageTitle(pathname)
+  }, [pathname])
+
+  return null
+}
 
 function ScrollManager() {
   const location = useLocation()
@@ -76,6 +108,7 @@ function AppFrame() {
   return (
     <div className="app-shell">
       <div className="app-scroll">
+        <DocumentTitle />
         <ScrollManager />
         <Routes>
           <Route path="/" element={<HomePage />} />

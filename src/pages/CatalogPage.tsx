@@ -1,5 +1,5 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { useMemo, type FormEvent } from 'react'
+import { useMemo, useRef, type FormEvent } from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { ProductCard } from '../components/ProductCard'
 import { useShop } from '../context/ShopContext'
@@ -15,10 +15,10 @@ import { formatProductCount } from '../lib/format'
 import type { CatalogFilters, CatalogSort, ProductCategoryId } from '../types'
 
 const popularCategoryIds: ProductCategoryId[] = [
-  'ready',
-  'salads',
-  'bakery',
-  'desserts',
+  'own-production',
+  'fruit-vegetables',
+  'cheese',
+  'bread-snacks-dough',
 ]
 
 const sortOptions: { value: CatalogSort; label: string }[] = [
@@ -29,6 +29,7 @@ const sortOptions: { value: CatalogSort; label: string }[] = [
 ]
 
 export function CatalogPage() {
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const {
     search,
     setSearchQuery,
@@ -47,6 +48,17 @@ export function CatalogPage() {
       ),
     [search.filters, search.query, search.sort],
   )
+  const categoryCounts = useMemo(
+    () =>
+      new Map(
+        catalogCategories.map((category) => [
+          category.id,
+          products.filter((product) => product.categoryId === category.id)
+            .length,
+        ]),
+      ),
+    [],
+  )
   const appliedFilterLabels = getAppliedFilterLabels(search.filters)
   const hasSearchSettings =
     Boolean(search.query.trim()) ||
@@ -62,6 +74,11 @@ export function CatalogPage() {
   const chooseSuggestion = (query: string) => {
     setSearchQuery(query)
     addRecentQuery(query)
+  }
+
+  const clearSearch = () => {
+    setSearchQuery('')
+    window.requestAnimationFrame(() => searchInputRef.current?.focus())
   }
 
   const chooseCategory = (categoryId: ProductCategoryId) => {
@@ -87,6 +104,7 @@ export function CatalogPage() {
             Поиск по каталогу
           </label>
           <input
+            ref={searchInputRef}
             id="catalog-search-input"
             type="search"
             value={search.query}
@@ -100,7 +118,7 @@ export function CatalogPage() {
               type="button"
               className="catalog-search__clear"
               aria-label="Очистить поисковый запрос"
-              onClick={() => setSearchQuery('')}
+              onClick={clearSearch}
             >
               <X aria-hidden="true" />
             </button>
@@ -153,6 +171,28 @@ export function CatalogPage() {
                     </button>
                   )
                 })}
+              </div>
+            </section>
+
+            <section aria-labelledby="all-categories-title">
+              <h2 id="all-categories-title">Все категории</h2>
+              <div className="catalog-category-list">
+                {catalogCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    className={
+                      search.filters.categoryId === category.id
+                        ? 'is-active'
+                        : undefined
+                    }
+                    aria-pressed={search.filters.categoryId === category.id}
+                    onClick={() => chooseCategory(category.id)}
+                  >
+                    <span>{category.label}</span>
+                    <strong>{categoryCounts.get(category.id) ?? 0}</strong>
+                  </button>
+                ))}
               </div>
             </section>
           </div>
@@ -215,7 +255,7 @@ export function CatalogPage() {
                 <option value="all">Все категории</option>
                 {catalogCategories.map((category) => (
                   <option key={category.id} value={category.id}>
-                    {category.label}
+                    {category.label} · {categoryCounts.get(category.id) ?? 0}
                   </option>
                 ))}
               </select>

@@ -9,9 +9,11 @@ import {
   Route,
   Smartphone,
 } from 'lucide-react'
+import { useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { useShop } from '../context/ShopContext'
+import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice, formatProductCount } from '../lib/format'
 import type { PaymentMethod } from '../types'
 
@@ -28,14 +30,25 @@ const PaymentIcon = ({ method }: { method: PaymentMethod }) => {
 export function OrderSuccessPage() {
   const navigate = useNavigate()
   const { orderId } = useParams()
-  const { lastOrder } = useShop()
-  const orderMatchesRoute =
+  const { clearOrderedCart, lastOrder } = useShop()
+  const matchedOrder =
     lastOrder && (!orderId || decodeURIComponent(orderId) === lastOrder.id)
+      ? lastOrder
+      : null
 
-  if (!orderMatchesRoute) {
+  useEffect(() => {
+    if (matchedOrder) clearOrderedCart(matchedOrder.id)
+  }, [clearOrderedCart, matchedOrder])
+
+  if (!matchedOrder) {
     return (
       <main className="screen screen--order-state">
-        <PageHeader title="Заказ" backTo="/" showCart={false} />
+        <PageHeader
+          title="Заказ"
+          backTo="/"
+          showCart={false}
+          headingLevel="none"
+        />
         <section className="order-not-found" aria-labelledby="order-not-found-title">
           <PackageOpen aria-hidden="true" />
           <h1 id="order-not-found-title">Демонстрационный заказ не найден</h1>
@@ -55,11 +68,17 @@ export function OrderSuccessPage() {
     )
   }
 
-  const order = lastOrder
+  const order = matchedOrder
+  const deliveryDate = formatSavedDeliveryDate(order.deliverySlot)
 
   return (
     <main className="screen screen--order-success">
-      <PageHeader title="Заказ оформлен" backTo="/" showCart={false} />
+      <PageHeader
+        title="Заказ оформлен"
+        backTo="/"
+        showCart={false}
+        headingLevel="none"
+      />
 
       <section className="success-hero" aria-labelledby="success-title">
         <span className="success-hero__icon">
@@ -89,7 +108,7 @@ export function OrderSuccessPage() {
           <span>
             <small>Ожидаемый интервал</small>
             <strong>
-              {order.deliverySlot.dayLabel}, {order.deliverySlot.dateLabel}
+              {deliveryDate.dayLabel}, {deliveryDate.dateLabel}
             </strong>
             <span>{order.deliverySlot.timeLabel}</span>
           </span>

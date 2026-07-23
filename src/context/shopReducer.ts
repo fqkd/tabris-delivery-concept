@@ -24,7 +24,8 @@ export type ShopAction =
   | { type: 'SET_SEARCH_SCROLL'; scrollTop: number }
   | { type: 'RESET_SEARCH' }
   | { type: 'SET_ELECTRONIC_RECEIPTS'; enabled: boolean }
-  | { type: 'ORDER_PLACED'; order: OrderSnapshot }
+  | { type: 'SAVE_ORDER'; order: OrderSnapshot }
+  | { type: 'CLEAR_ORDERED_CART'; orderId: string }
 
 export const shopReducer = (
   state: PersistedShopState,
@@ -72,7 +73,6 @@ export const shopReducer = (
     return {
       ...state,
       address: action.address,
-      addressConfirmed: true,
     }
   }
 
@@ -138,13 +138,24 @@ export const shopReducer = (
     return { ...state, electronicReceipts: action.enabled }
   }
 
-  if (action.type === 'ORDER_PLACED') {
+  if (action.type === 'SAVE_ORDER') {
+    if (state.lastOrder?.id === action.order.id) return state
     return {
       ...state,
-      cart: {},
       lastOrder: action.order,
       bonusBalance: action.order.bonusBalanceAfter,
+      pendingCartClearOrderId: action.order.id,
     }
+  }
+
+  if (action.type === 'CLEAR_ORDERED_CART') {
+    if (
+      state.lastOrder?.id !== action.orderId ||
+      state.pendingCartClearOrderId !== action.orderId
+    ) {
+      return state
+    }
+    return { ...state, cart: {}, pendingCartClearOrderId: null }
   }
 
   return state

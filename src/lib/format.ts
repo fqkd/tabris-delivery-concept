@@ -1,6 +1,6 @@
 export const formatPrice = (value: number) =>
   new Intl.NumberFormat('ru-RU', {
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(value)
 
 export const discountPercent = (price: number, oldPrice?: number) =>

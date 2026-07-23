@@ -1,4 +1,7 @@
-import { getCategoryLabel } from '../data/catalogCategories'
+import {
+  catalogCategories,
+  getCategoryLabel,
+} from '../data/catalogCategories'
 import { discountPercent } from './format'
 import type {
   CatalogFilters,
@@ -85,6 +88,4 @@ export const getAppliedFilterLabels = (filters: CatalogFilters) => {
 export const isProductCategoryId = (
   value: string,
 ): value is ProductCategoryId =>
-  ['ready', 'salads', 'bakery', 'desserts', 'cheese', 'fish', 'drinks'].includes(
-    value,
-  )
+  catalogCategories.some((category) => category.id === value)

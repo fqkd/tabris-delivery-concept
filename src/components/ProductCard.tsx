@@ -44,6 +44,11 @@ export function ProductCard({
         {product.ownProduction && (
           <span className="product-card__badge">Наше производство</span>
         )}
+        {product.ageRestricted && (
+          <span className="product-card__age" aria-label="Товар только для лиц старше 18 лет">
+            18+
+          </span>
+        )}
         {discount > 0 && (
           <span className="product-card__discount">−{discount}%</span>
         )}

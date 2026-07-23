@@ -16,6 +16,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { useShop } from '../context/ShopContext'
+import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice, formatProductCount } from '../lib/format'
 import { buildTrackingTimeline } from '../lib/order'
 import type { OrderStatus, PaymentMethod } from '../types'
@@ -44,7 +45,12 @@ export function TrackingPage() {
   ) {
     return (
       <main className="screen screen--order-state">
-        <PageHeader title="Отслеживание" backTo="/" showCart={false} />
+        <PageHeader
+          title="Отслеживание"
+          backTo="/"
+          showCart={false}
+          headingLevel="none"
+        />
         <section className="order-not-found" aria-labelledby="tracking-empty-title">
           <PackageOpen aria-hidden="true" />
           <h1 id="tracking-empty-title">Заказ для отслеживания не найден</h1>
@@ -65,6 +71,7 @@ export function TrackingPage() {
   }
 
   const order = lastOrder
+  const deliveryDate = formatSavedDeliveryDate(order.deliverySlot)
   const timeline = buildTrackingTimeline(order)
   const PaymentIcon = order.paymentMethod === 'card' ? CreditCard : Smartphone
   const showCourierMarker =
@@ -72,7 +79,12 @@ export function TrackingPage() {
 
   return (
     <main className="screen screen--tracking">
-      <PageHeader title={`Заказ № ${order.id}`} backTo="/profile" showCart={false} />
+      <PageHeader
+        title={`Заказ № ${order.id}`}
+        backTo="/profile"
+        showCart={false}
+        headingLevel="none"
+      />
 
       <section className="tracking-status" aria-labelledby="tracking-status-title">
         <span className="tracking-status__icon">
@@ -86,8 +98,9 @@ export function TrackingPage() {
           <span>
             <small>Ожидаемая доставка</small>
             <strong>
-              {order.deliverySlot.dayLabel}, {order.deliverySlot.timeLabel}
+              {deliveryDate.dayLabel}, {deliveryDate.dateLabel}
             </strong>
+            <span>{order.deliverySlot.timeLabel}</span>
           </span>
         </div>
       </section>

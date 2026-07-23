@@ -16,14 +16,16 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AppPortal } from '../components/AppPortal'
 import { PageHeader } from '../components/PageHeader'
-import { DEMO_RULES, deliverySlots } from '../config/demoRules'
+import { DEMO_RULES } from '../config/demoRules'
 import { useShop } from '../context/ShopContext'
+import { roundBonusAmount } from '../lib/bonus'
 import {
   calculateMaxBonusSpend,
   calculateOrderTotals,
   getCartItems,
 } from '../lib/cart'
 import { formatPrice, formatProductCount } from '../lib/format'
+import { createDeliverySlots } from '../lib/deliveryDates'
 import {
   createDemoOrderId,
   createOrderSnapshot,
@@ -68,13 +70,13 @@ const paymentOptions: Array<{
   {
     value: 'card',
     title: 'Банковская карта',
-    description: 'Демонстрационный выбор без ввода реквизитов',
+    description: 'Сохранить способ в составе заказа',
     icon: CreditCard,
   },
   {
     value: 'sbp',
     title: 'СБП',
-    description: 'Только состояние интерфейса, без оплаты',
+    description: 'Альтернативный способ в интерфейсе',
     icon: Smartphone,
   },
 ]
@@ -85,21 +87,22 @@ const demoOtherRecipient: DemoProfile = {
 }
 
 const getDayKey = (slot: DeliverySlot) =>
-  `${slot.dayLabel}-${slot.dateLabel}`
+  slot.dateKey
 
 export function CheckoutPage() {
   const navigate = useNavigate()
   const {
     address,
-    addressConfirmed,
     bonusBalance,
     cart,
+    clearOrderedCart,
     electronicReceipts,
     openAddress,
     placeOrder,
     profile,
   } = useShop()
   const cartItems = useMemo(() => getCartItems(cart), [cart])
+  const deliverySlots = useMemo(() => createDeliverySlots(), [])
   const dayOptions = useMemo(
     () =>
       Array.from(
@@ -110,7 +113,7 @@ export function CheckoutPage() {
           ]),
         ).values(),
       ),
-    [],
+    [deliverySlots],
   )
   const firstAvailableSlot = deliverySlots.find((slot) => slot.available)
   const [selectedDay, setSelectedDay] = useState(
@@ -150,7 +153,7 @@ export function CheckoutPage() {
   )
   const errors = validateCheckout(
     {
-      addressConfirmed,
+      address,
       recipient,
       deliverySlot: selectedSlot,
       substitutionPolicy,
@@ -186,6 +189,7 @@ export function CheckoutPage() {
       !selectedSlot ||
       !substitutionPolicy ||
       !paymentMethod ||
+      !address ||
       cartItems.length === 0
     ) {
       document
@@ -220,9 +224,10 @@ export function CheckoutPage() {
     navigate(`/orders/${encodeURIComponent(order.id)}/success`, {
       replace: true,
     })
+    window.requestAnimationFrame(() => clearOrderedCart(order.id))
   }
 
-  if (cartItems.length === 0) {
+  if (cartItems.length === 0 && !isSubmitting) {
     return (
       <main className="screen screen--checkout">
         <PageHeader title="Оформление" backTo="/cart" showCart={false} />
@@ -246,6 +251,11 @@ export function CheckoutPage() {
     <main className="screen screen--checkout has-checkout-action">
       <PageHeader title="Оформление" backTo="/cart" showCart={false} />
 
+      <div className="checkout-demo-note" role="note">
+        Это демонстрация: данные, заказ и платёжные запросы никуда не
+        отправляются.
+      </div>
+
       {submitAttempted && checkoutHasErrors && (
         <div
           className="checkout-error-summary"
@@ -264,7 +274,7 @@ export function CheckoutPage() {
           </span>
           <div>
             <h2 id="checkout-address-title">Адрес</h2>
-            <p>Доставка внутри демонстрационного приложения</p>
+            <p>Проверьте адрес перед оформлением</p>
           </div>
         </div>
         <button
@@ -274,10 +284,12 @@ export function CheckoutPage() {
           aria-describedby={submitAttempted && errors.address ? 'address-error' : undefined}
         >
           <span>
-            <strong>{address.street}</strong>
-            <small>{address.city}</small>
+            <strong>{address?.street ?? 'Выберите адрес доставки'}</strong>
+            <small>
+              {address?.city ?? 'Адрес сохранится после подтверждения'}
+            </small>
           </span>
-          <span>Изменить</span>
+          <span>{address ? 'Изменить' : 'Выбрать'}</span>
           <ChevronRight aria-hidden="true" />
         </button>
         {submitAttempted && errors.address && (
@@ -294,7 +306,7 @@ export function CheckoutPage() {
           </span>
           <div>
             <h2 id="recipient-title">Получатель</h2>
-            <p>Без передачи настоящих персональных данных</p>
+            <p>Данные получателя</p>
           </div>
         </div>
         <div className="recipient-card">
@@ -346,7 +358,7 @@ export function CheckoutPage() {
               }
             />
             <small id="recipient-demo-note">
-              Используйте только условные данные для демонстрации.
+              Проверьте имя и телефон получателя.
             </small>
           </div>
         )}
@@ -500,7 +512,7 @@ export function CheckoutPage() {
           </span>
           <span>
             <strong>Оплата</strong>
-            <small>Настоящая платёжная форма не создаётся</small>
+            <small>Выберите способ для заказа</small>
           </span>
         </legend>
         <div className="choice-list">
@@ -564,16 +576,18 @@ export function CheckoutPage() {
               <input
                 id="bonus-spend"
                 type="number"
-                inputMode="numeric"
+                inputMode="decimal"
                 min={0}
                 max={maxBonusSpend}
-                step={1}
+                step={0.01}
                 value={requestedBonusSpend}
                 onChange={(event) => {
                   const value = Number(event.target.value)
                   setRequestedBonusSpend(
                     Number.isFinite(value)
-                      ? Math.min(maxBonusSpend, Math.max(0, Math.floor(value)))
+                      ? roundBonusAmount(
+                          Math.min(maxBonusSpend, Math.max(0, value)),
+                        )
                       : 0,
                   )
                 }}
@@ -595,8 +609,8 @@ export function CheckoutPage() {
           </div>
         </dl>
         <p className="demo-rule-note">
-          Расчёт в этом концепте демонстрационный. Акционные товары не участвуют
-          в начислении.
+          Акционные товары не участвуют в начислении. Доставка исключена из
+          бонусного расчёта в рамках демонстрационного допущения.
         </p>
       </section>
 

@@ -7,6 +7,7 @@ type PageHeaderProps = {
   backTo?: string
   showCart?: boolean
   onBack?: () => void
+  headingLevel?: 1 | 2 | 'none'
 }
 
 export function PageHeader({
@@ -14,6 +15,7 @@ export function PageHeader({
   backTo,
   showCart = true,
   onBack,
+  headingLevel = 1,
 }: PageHeaderProps) {
   const navigate = useNavigate()
   const { cartCount } = useShop()
@@ -32,7 +34,13 @@ export function PageHeader({
       >
         <ArrowLeft aria-hidden="true" />
       </button>
-      <h1>{title}</h1>
+      {headingLevel === 'none' ? (
+        <span className="page-header__title">{title}</span>
+      ) : headingLevel === 2 ? (
+        <h2>{title}</h2>
+      ) : (
+        <h1>{title}</h1>
+      )}
       {showCart ? (
         <button
           type="button"

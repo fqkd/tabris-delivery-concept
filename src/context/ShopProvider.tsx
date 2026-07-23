@@ -22,7 +22,7 @@ export function ShopProvider({ children }: ShopProviderProps) {
     loadPersistedState,
   )
   const [isAddressOpen, setAddressOpen] = useState(
-    () => !state.addressConfirmed,
+    () => state.address === null,
   )
 
   useEffect(() => {
@@ -64,7 +64,9 @@ export function ShopProvider({ children }: ShopProviderProps) {
       setElectronicReceipts: (enabled: boolean) =>
         dispatch({ type: 'SET_ELECTRONIC_RECEIPTS', enabled }),
       placeOrder: (order: OrderSnapshot) =>
-        dispatch({ type: 'ORDER_PLACED', order }),
+        dispatch({ type: 'SAVE_ORDER', order }),
+      clearOrderedCart: (orderId: string) =>
+        dispatch({ type: 'CLEAR_ORDERED_CART', orderId }),
     }),
     [isAddressOpen, state],
   )

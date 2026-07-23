@@ -1,6 +1,5 @@
 import {
   DEMO_RULES,
-  defaultAddress,
   defaultFilters,
   defaultProfile,
   defaultSearchState,
@@ -8,6 +7,12 @@ import {
 import { productIds } from '../data/products'
 import { isProductCategoryId } from './catalog'
 import { normalizeQuantity } from './cart'
+import {
+  addLocalDays,
+  getNearestDeliveryTimeLabel,
+  isLocalDateKey,
+  toLocalDateKey,
+} from './deliveryDates'
 import type {
   CatalogFilters,
   CatalogSort,
@@ -26,7 +31,7 @@ import type {
 } from '../types'
 
 const STORAGE_KEY = 'tabris-concept-state'
-const STORAGE_VERSION = 2
+const STORAGE_VERSION = 3
 
 type UnknownRecord = Record<string, unknown>
 
@@ -51,8 +56,7 @@ const safeNumber = (
 export const createDefaultPersistedState = (): PersistedShopState => ({
   cart: {},
   favoriteIds: [],
-  address: { ...defaultAddress },
-  addressConfirmed: false,
+  address: null,
   search: {
     ...defaultSearchState,
     recentQueries: [...defaultSearchState.recentQueries],
@@ -62,6 +66,7 @@ export const createDefaultPersistedState = (): PersistedShopState => ({
   electronicReceipts: true,
   bonusBalance: DEMO_RULES.initialBonusBalance,
   lastOrder: null,
+  pendingCartClearOrderId: null,
 })
 
 export const sanitizeCart = (value: unknown): CartState => {
@@ -75,14 +80,18 @@ export const sanitizeCart = (value: unknown): CartState => {
   }, {})
 }
 
-const sanitizeAddress = (value: unknown): DeliveryAddress => {
-  if (!isRecord(value)) return { ...defaultAddress }
+const sanitizeAddress = (value: unknown): DeliveryAddress | null => {
+  if (!isRecord(value)) return null
+  const city = safeString(value.city, '', 50)
+  const street = safeString(value.street, '', 100)
+  if (!city || !street) return null
+
   return {
-    city: safeString(value.city, defaultAddress.city, 50),
-    street: safeString(value.street, defaultAddress.street, 100),
+    city,
+    street,
     deliveryTime: safeString(
       value.deliveryTime,
-      defaultAddress.deliveryTime,
+      getNearestDeliveryTimeLabel(),
       60,
     ),
   }
@@ -147,7 +156,10 @@ const sanitizeSearch = (value: unknown): SearchState => {
   }
 }
 
-const sanitizeDeliverySlot = (value: unknown): DeliverySlot | null => {
+const sanitizeDeliverySlot = (
+  value: unknown,
+  referenceDate = new Date(),
+): DeliverySlot | null => {
   if (!isRecord(value)) return null
   if (
     typeof value.id !== 'string' ||
@@ -157,8 +169,16 @@ const sanitizeDeliverySlot = (value: unknown): DeliverySlot | null => {
   ) {
     return null
   }
+  const fallbackOffset = value.dayLabel === 'Завтра' ? 1 : 0
+  const fallbackDate = addLocalDays(referenceDate, fallbackOffset)
+  const dateKey =
+    typeof value.dateKey === 'string' && isLocalDateKey(value.dateKey)
+      ? value.dateKey
+      : toLocalDateKey(fallbackDate)
+
   return {
     id: value.id.slice(0, 40),
+    dateKey,
     dayLabel: value.dayLabel.slice(0, 30),
     dateLabel: value.dateLabel.slice(0, 30),
     timeLabel: value.timeLabel.slice(0, 30),
@@ -242,7 +262,16 @@ const paymentMethods: PaymentMethod[] = ['card', 'sbp']
 
 const sanitizeOrder = (value: unknown): OrderSnapshot | null => {
   if (!isRecord(value) || !Array.isArray(value.lines)) return null
-  const deliverySlot = sanitizeDeliverySlot(value.deliverySlot)
+  const createdAt =
+    typeof value.createdAt === 'string' &&
+    !Number.isNaN(Date.parse(value.createdAt))
+      ? value.createdAt
+      : null
+  const deliverySlot = sanitizeDeliverySlot(
+    value.deliverySlot,
+    createdAt ? new Date(createdAt) : new Date(),
+  )
+  const address = sanitizeAddress(value.address)
   const totals = sanitizeTotals(value.totals)
   const lines = value.lines
     .map(sanitizeOrderLine)
@@ -265,9 +294,9 @@ const sanitizeOrder = (value: unknown): OrderSnapshot | null => {
 
   if (
     typeof value.id !== 'string' ||
-    typeof value.createdAt !== 'string' ||
-    Number.isNaN(Date.parse(value.createdAt)) ||
+    !createdAt ||
     !deliverySlot ||
+    !address ||
     !totals ||
     !substitutionPolicy ||
     !paymentMethod ||
@@ -278,9 +307,9 @@ const sanitizeOrder = (value: unknown): OrderSnapshot | null => {
 
   return {
     id: value.id.slice(0, 50),
-    createdAt: value.createdAt,
+    createdAt,
     status,
-    address: sanitizeAddress(value.address),
+    address,
     deliverySlot,
     recipient: sanitizeProfile(value.recipient),
     substitutionPolicy,
@@ -309,11 +338,18 @@ const sanitizePersistedState = (value: unknown): PersistedShopState => {
       )]
     : []
 
+  const lastOrder = sanitizeOrder(value.lastOrder)
+  const pendingCartClearOrderId =
+    lastOrder &&
+    typeof value.pendingCartClearOrderId === 'string' &&
+    value.pendingCartClearOrderId === lastOrder.id
+      ? lastOrder.id
+      : null
+
   return {
     cart: sanitizeCart(value.cart),
     favoriteIds,
     address: sanitizeAddress(value.address),
-    addressConfirmed: value.addressConfirmed === true,
     search: sanitizeSearch(value.search),
     profile: sanitizeProfile(value.profile),
     electronicReceipts: value.electronicReceipts !== false,
@@ -321,7 +357,8 @@ const sanitizePersistedState = (value: unknown): PersistedShopState => {
       value.bonusBalance,
       DEMO_RULES.initialBonusBalance,
     ),
-    lastOrder: sanitizeOrder(value.lastOrder),
+    lastOrder,
+    pendingCartClearOrderId,
   }
 }
 
@@ -341,12 +378,12 @@ const migrateLegacySession = (): PersistedShopState => {
     const legacyAddress = parseJson(
       sessionStorage.getItem('tabris-concept-address'),
     )
+    const addressConfirmed =
+      sessionStorage.getItem('tabris-concept-address-confirmed') === 'true'
     return {
       ...defaults,
       cart: sanitizeCart(legacyCart),
-      address: sanitizeAddress(legacyAddress),
-      addressConfirmed:
-        sessionStorage.getItem('tabris-concept-address-confirmed') === 'true',
+      address: addressConfirmed ? sanitizeAddress(legacyAddress) : null,
     }
   } catch {
     return defaults
@@ -356,8 +393,17 @@ const migrateLegacySession = (): PersistedShopState => {
 export const loadPersistedState = (): PersistedShopState => {
   try {
     const parsed = parseJson(localStorage.getItem(STORAGE_KEY))
-    if (isRecord(parsed) && parsed.version === STORAGE_VERSION) {
-      return sanitizePersistedState(parsed.data)
+    if (isRecord(parsed)) {
+      if (parsed.version === STORAGE_VERSION) {
+        return sanitizePersistedState(parsed.data)
+      }
+      if (parsed.version === 2 && isRecord(parsed.data)) {
+        return sanitizePersistedState({
+          ...parsed.data,
+          address:
+            parsed.data.addressConfirmed === true ? parsed.data.address : null,
+        })
+      }
     }
     return migrateLegacySession()
   } catch {

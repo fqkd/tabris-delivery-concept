@@ -13,8 +13,7 @@ import type {
 export type ShopContextValue = {
   cart: CartState
   favoriteIds: string[]
-  address: DeliveryAddress
-  addressConfirmed: boolean
+  address: DeliveryAddress | null
   isAddressOpen: boolean
   cartCount: number
   search: SearchState
@@ -39,6 +38,7 @@ export type ShopContextValue = {
   resetSearch: () => void
   setElectronicReceipts: (enabled: boolean) => void
   placeOrder: (order: OrderSnapshot) => void
+  clearOrderedCart: (orderId: string) => void
 }
 
 export const ShopContext = createContext<ShopContextValue | null>(null)

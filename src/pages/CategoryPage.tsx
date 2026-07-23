@@ -5,11 +5,13 @@ import { ProductCard } from '../components/ProductCard'
 import { ownProductionProducts } from '../data/products'
 import { formatProductCount } from '../lib/format'
 
-const tabs = ['Все', 'Салаты', 'Горячее', 'Выпечка', 'Десерты', 'Роллы'] as const
-type Tab = (typeof tabs)[number]
+const tabs = [
+  'Все',
+  ...new Set(ownProductionProducts.map((product) => product.subcategory)),
+]
 
 export function CategoryPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('Все')
+  const [activeTab, setActiveTab] = useState('Все')
   const [sortByPrice, setSortByPrice] = useState(false)
   const [onlyAvailable, setOnlyAvailable] = useState(false)
 

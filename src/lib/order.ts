@@ -1,4 +1,5 @@
 import { getCartItems } from './cart'
+import { roundBonusAmount } from './bonus'
 import type {
   CartState,
   DeliveryAddress,
@@ -11,7 +12,7 @@ import type {
 } from '../types'
 
 export type CheckoutInput = {
-  addressConfirmed: boolean
+  address: DeliveryAddress | null
   recipient: DemoProfile
   deliverySlot: DeliverySlot | null
   substitutionPolicy: SubstitutionPolicy | null
@@ -22,7 +23,7 @@ export const validateCheckout = (
   input: CheckoutInput,
   totals: OrderTotals,
 ) => ({
-  address: input.addressConfirmed ? '' : 'Выберите адрес доставки',
+  address: input.address ? '' : 'Выберите адрес доставки',
   recipient:
     input.recipient.name.trim().length >= 2 && input.recipient.phone.trim()
       ? ''
@@ -45,7 +46,9 @@ export const createDemoOrderId = (createdAt: Date) => {
   const day = String(createdAt.getDate()).padStart(2, '0')
   const hour = String(createdAt.getHours()).padStart(2, '0')
   const minute = String(createdAt.getMinutes()).padStart(2, '0')
-  return `ДЕМО-${day}${hour}${minute}`
+  const second = String(createdAt.getSeconds()).padStart(2, '0')
+  const millisecond = String(createdAt.getMilliseconds()).padStart(3, '0')
+  return `ДЕМО-${day}${hour}${minute}${second}${millisecond}`
 }
 
 type CreateOrderSnapshotInput = {
@@ -87,9 +90,8 @@ export const createOrderSnapshot = (
   })),
   totals: input.totals,
   bonusBalanceBefore: input.bonusBalanceBefore,
-  bonusBalanceAfter: Math.max(
-    0,
-    input.bonusBalanceBefore - input.totals.bonusSpent,
+  bonusBalanceAfter: roundBonusAmount(
+    Math.max(0, input.bonusBalanceBefore - input.totals.bonusSpent),
   ),
 })
 

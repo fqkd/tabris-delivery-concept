@@ -16,6 +16,7 @@ import { PageHeader } from '../components/PageHeader'
 import { ProductCard } from '../components/ProductCard'
 import { useShop } from '../context/ShopContext'
 import { products } from '../data/products'
+import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice } from '../lib/format'
 import type { OrderStatus } from '../types'
 
@@ -32,7 +33,6 @@ export function ProfilePage() {
   const {
     profile,
     address,
-    addressConfirmed,
     openAddress,
     favoriteIds,
     lastOrder,
@@ -42,6 +42,9 @@ export function ProfilePage() {
     () => products.filter((product) => favoriteIds.includes(product.id)),
     [favoriteIds],
   )
+  const lastOrderDeliveryDate = lastOrder
+    ? formatSavedDeliveryDate(lastOrder.deliverySlot)
+    : null
 
   return (
     <main className="screen screen--profile has-bottom-nav">
@@ -75,15 +78,17 @@ export function ProfilePage() {
           </span>
           <span className="profile-action-row__copy">
             <strong>
-              {addressConfirmed ? address.street : 'Выберите адрес доставки'}
+              {address?.street ?? 'Выберите адрес доставки'}
             </strong>
             <small>
-              {addressConfirmed
+              {address
                 ? `${address.city} · ${address.deliveryTime}`
                 : 'Он сохранится в этом демонстрационном профиле'}
             </small>
           </span>
-          <span className="profile-action-row__action">Изменить</span>
+          <span className="profile-action-row__action">
+            {address ? 'Изменить' : 'Выбрать'}
+          </span>
           <ChevronRight aria-hidden="true" />
         </button>
       </section>
@@ -136,7 +141,8 @@ export function ProfilePage() {
               <span className="profile-order-card__meta">
                 <span>
                   <Clock3 aria-hidden="true" />
-                  {lastOrder.deliverySlot.dayLabel},{' '}
+                  {lastOrderDeliveryDate?.dayLabel},{' '}
+                  {lastOrderDeliveryDate?.dateLabel},{' '}
                   {lastOrder.deliverySlot.timeLabel}
                 </span>
                 <span>{formatPrice(lastOrder.totals.payableTotal)} ₽</span>

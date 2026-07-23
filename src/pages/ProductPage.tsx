@@ -24,7 +24,7 @@ export function ProductPage() {
   if (!product) {
     return (
       <main className="screen product-not-found">
-        <strong>Товар не найден</strong>
+        <h1>Товар не найден</h1>
         <button type="button" onClick={() => navigate('/category/own-production')}>
           Вернуться в каталог
         </button>
@@ -93,6 +93,11 @@ export function ProductPage() {
             Наше производство
           </span>
         )}
+        {product.ageRestricted && (
+          <span className="age-restriction-label">
+            18+ · Только для совершеннолетних
+          </span>
+        )}
 
         <h1>{product.name}</h1>
         <span className="product-detail__weight">{product.weight}</span>
@@ -128,7 +133,7 @@ export function ProductPage() {
             <small>{bonus > 0 ? 'Начислим за покупку' : 'Табрис Бонус'}</small>
             <strong>
               {bonus > 0
-                ? `+${bonus} бонусов`
+                ? `+${formatPrice(bonus)} бонусов`
                 : 'За акционный товар бонусы не начисляются'}
             </strong>
           </span>

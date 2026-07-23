@@ -18,6 +18,7 @@ import { useNavigate } from 'react-router-dom'
 import { ProductCard } from '../components/ProductCard'
 import { useShop } from '../context/ShopContext'
 import { products } from '../data/products'
+import { getNearestDeliveryTimeLabel } from '../lib/deliveryDates'
 import { formatPrice } from '../lib/format'
 import type { ProductCategoryId } from '../types'
 
@@ -34,11 +35,27 @@ const categories: Category[] = [
     icon: Sparkles,
     ownProduction: true,
   },
-  { label: 'Готовые блюда', icon: Utensils, categoryId: 'ready' },
+  {
+    label: 'Готовые блюда',
+    icon: Utensils,
+    categoryId: 'own-production',
+  },
   { label: 'Сыры', icon: Milk, categoryId: 'cheese' },
-  { label: 'Выпечка', icon: Wheat, categoryId: 'bakery' },
-  { label: 'Рыба', icon: Fish, categoryId: 'fish' },
-  { label: 'Десерты', icon: CakeSlice, categoryId: 'desserts' },
+  {
+    label: 'Выпечка',
+    icon: Wheat,
+    categoryId: 'bread-snacks-dough',
+  },
+  {
+    label: 'Рыба',
+    icon: Fish,
+    categoryId: 'fish-delicacies',
+  },
+  {
+    label: 'Десерты',
+    icon: CakeSlice,
+    categoryId: 'sweets-cookies-chocolate',
+  },
 ]
 
 type SectionHeadingProps = {
@@ -87,6 +104,7 @@ export function HomePage() {
     resetSearch,
     setSearchFilters,
   } = useShop()
+  const nearestDeliveryTime = getNearestDeliveryTimeLabel()
 
   const openCategory = (category: Category) => {
     if (category.ownProduction) {
@@ -103,6 +121,7 @@ export function HomePage() {
   return (
     <main className="screen screen--home has-bottom-nav">
       <header className="home-header">
+        <h1 className="visually-hidden">Доставка продуктов «Табрис»</h1>
         <div className="brand-lockup" aria-label="Табрис">
           <img
             src="/images/brand/tabris-app-mark.webp"
@@ -125,13 +144,15 @@ export function HomePage() {
 
       <button type="button" className="address-bar" onClick={openAddress}>
         <span>
-          <small>Доставим по адресу</small>
-          <strong>{address.street}</strong>
+          <small>{address ? 'Доставим по адресу' : 'Адрес доставки'}</small>
+          <strong>{address?.street ?? 'Выберите адрес'}</strong>
         </span>
         <ChevronDown aria-hidden="true" />
         <span className="address-bar__time">
           <Clock3 aria-hidden="true" />
-          {address.deliveryTime.replace('Сегодня, ', '')}
+          {address
+            ? nearestDeliveryTime.replace('Сегодня, ', '')
+            : 'Уточнить'}
         </span>
       </button>
 
@@ -217,7 +238,7 @@ export function HomePage() {
           title="Готовые блюда"
           action={() => {
             resetSearch()
-            setSearchFilters({ categoryId: 'ready' })
+            setSearchFilters({ categoryId: 'own-production' })
             navigate('/catalog')
           }}
         />
@@ -225,7 +246,7 @@ export function HomePage() {
           productIds={[
             'chicken-mushroom-pasta',
             'salmon-roll',
-            'butter-croissant',
+            'korean-beef-rice',
           ]}
         />
       </section>
