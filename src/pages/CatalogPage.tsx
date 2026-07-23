@@ -1,5 +1,11 @@
 import { Search, SlidersHorizontal, X } from 'lucide-react'
-import { useMemo, useRef, type FormEvent } from 'react'
+import {
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type FormEvent,
+} from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { ProductCard } from '../components/ProductCard'
 import { useShop } from '../context/ShopContext'
@@ -8,7 +14,6 @@ import { products } from '../data/products'
 import {
   filterProducts,
   getAppliedFilterLabels,
-  isProductCategoryId,
   sortProducts,
 } from '../lib/catalog'
 import { formatProductCount } from '../lib/format'
@@ -29,7 +34,10 @@ const sortOptions: { value: CatalogSort; label: string }[] = [
 ]
 
 export function CatalogPage() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const resultsHeadingRef = useRef<HTMLDivElement>(null)
   const {
     search,
     setSearchQuery,
@@ -47,17 +55,6 @@ export function CatalogPage() {
         search.sort,
       ),
     [search.filters, search.query, search.sort],
-  )
-  const categoryCounts = useMemo(
-    () =>
-      new Map(
-        catalogCategories.map((category) => [
-          category.id,
-          products.filter((product) => product.categoryId === category.id)
-            .length,
-        ]),
-      ),
-    [],
   )
   const appliedFilterLabels = getAppliedFilterLabels(search.filters)
   const hasSearchSettings =
@@ -81,10 +78,48 @@ export function CatalogPage() {
     window.requestAnimationFrame(() => searchInputRef.current?.focus())
   }
 
-  const chooseCategory = (categoryId: ProductCategoryId) => {
-    setSearchQuery('')
-    setSearchFilters({ categoryId })
+  const scrollToResults = () => {
+    setSearchScrollTop(0)
+    window.requestAnimationFrame(() =>
+      resultsHeadingRef.current?.scrollIntoView({
+        block: 'start',
+      }),
+    )
   }
+
+  const chooseCategory = (categoryId: ProductCategoryId) => {
+    setSearchFilters({
+      categoryId:
+        search.filters.categoryId === categoryId ? 'all' : categoryId,
+    })
+    scrollToResults()
+  }
+
+  const showAllProducts = () => {
+    setSearchFilters({ categoryId: 'all' })
+    scrollToResults()
+  }
+
+  useLayoutEffect(() => {
+    const state = location.state as
+      | {
+          scrollToCatalogResults?: boolean
+          scrollToCatalogTop?: boolean
+        }
+      | null
+    if (state?.scrollToCatalogTop) {
+      document
+        .querySelector<HTMLElement>('.app-scroll')
+        ?.scrollTo({ top: 0 })
+      setSearchScrollTop(0)
+      navigate('/catalog', { replace: true, state: null })
+      return
+    }
+    if (!state?.scrollToCatalogResults) return
+
+    resultsHeadingRef.current?.scrollIntoView({ block: 'start' })
+    navigate('/catalog', { replace: true, state: null })
+  }, [location.state, navigate, setSearchScrollTop])
 
   const toggleFilter = (filter: keyof Pick<
     CatalogFilters,
@@ -125,77 +160,73 @@ export function CatalogPage() {
           )}
         </form>
 
-        {!search.query.trim() && (
-          <div className="catalog-discovery">
-            {search.recentQueries.length > 0 && (
-              <section aria-labelledby="recent-searches-title">
-                <h2 id="recent-searches-title">Недавние запросы</h2>
-                <div className="catalog-discovery__chips">
-                  {search.recentQueries.map((query) => (
-                    <button
-                      key={query}
-                      type="button"
-                      onClick={() => chooseSuggestion(query)}
-                    >
-                      {query}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <section aria-labelledby="popular-categories-title">
-              <h2 id="popular-categories-title">Популярные категории</h2>
-              <div className="catalog-discovery__categories">
-                {popularCategoryIds.map((categoryId) => {
-                  const category = catalogCategories.find(
-                    (item) => item.id === categoryId,
-                  )
-                  if (!category) return null
-
-                  return (
-                    <button
-                      key={category.id}
-                      type="button"
-                      className={
-                        search.filters.categoryId === category.id
-                          ? 'is-active'
-                          : undefined
-                      }
-                      aria-pressed={
-                        search.filters.categoryId === category.id
-                      }
-                      onClick={() => chooseCategory(category.id)}
-                    >
-                      {category.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </section>
-
-            <section aria-labelledby="all-categories-title">
-              <h2 id="all-categories-title">Все категории</h2>
-              <div className="catalog-category-list">
-                {catalogCategories.map((category) => (
-                  <button
-                    key={category.id}
-                    type="button"
-                    className={
-                      search.filters.categoryId === category.id
-                        ? 'is-active'
-                        : undefined
-                    }
-                    aria-pressed={search.filters.categoryId === category.id}
-                    onClick={() => chooseCategory(category.id)}
-                  >
-                    <span>{category.label}</span>
-                    <strong>{categoryCounts.get(category.id) ?? 0}</strong>
-                  </button>
-                ))}
-              </div>
-            </section>
+        <section
+          className="catalog-category-shortcuts"
+          aria-labelledby="popular-categories-title"
+        >
+          <div className="catalog-category-shortcuts__actions">
+            <button
+              type="button"
+              className={
+                search.filters.categoryId === 'all' ? 'is-active' : undefined
+              }
+              aria-pressed={search.filters.categoryId === 'all'}
+              onClick={showAllProducts}
+            >
+              Все товары
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate('/catalog/categories')}
+            >
+              Все категории ({catalogCategories.length})
+            </button>
           </div>
+          <h2 id="popular-categories-title">Популярные категории</h2>
+          <div className="catalog-category-shortcuts__popular">
+            {popularCategoryIds.map((categoryId) => {
+              const category = catalogCategories.find(
+                (item) => item.id === categoryId,
+              )
+              if (!category) return null
+
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  className={
+                    search.filters.categoryId === category.id
+                      ? 'is-active'
+                      : undefined
+                  }
+                  aria-pressed={search.filters.categoryId === category.id}
+                  onClick={() => chooseCategory(category.id)}
+                >
+                  {category.label}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        {!search.query.trim() && search.recentQueries.length > 0 && (
+          <section
+            className="catalog-recent-searches"
+            aria-labelledby="recent-searches-title"
+          >
+            <h2 id="recent-searches-title">Недавние запросы</h2>
+            <div>
+              {search.recentQueries.map((query) => (
+                <button
+                  key={query}
+                  type="button"
+                  onClick={() => chooseSuggestion(query)}
+                >
+                  {query}
+                </button>
+              ))}
+            </div>
+          </section>
         )}
 
         <section className="catalog-filter-panel" aria-labelledby="filters-title">
@@ -242,26 +273,6 @@ export function CatalogPage() {
 
           <div className="catalog-controls">
             <label>
-              <span>Категория</span>
-              <select
-                value={search.filters.categoryId}
-                onChange={(event) => {
-                  const value = event.target.value
-                  setSearchFilters({
-                    categoryId: isProductCategoryId(value) ? value : 'all',
-                  })
-                }}
-              >
-                <option value="all">Все категории</option>
-                {catalogCategories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.label} · {categoryCounts.get(category.id) ?? 0}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
               <span>Сортировка</span>
               <select
                 value={search.sort}
@@ -288,7 +299,11 @@ export function CatalogPage() {
           )}
         </section>
 
-        <div className="catalog-results-heading" aria-live="polite">
+        <div
+          ref={resultsHeadingRef}
+          className="catalog-results-heading"
+          aria-live="polite"
+        >
           <h2>{search.query.trim() ? 'Результаты поиска' : 'Все товары'}</h2>
           <span>{formatProductCount(visibleProducts.length)}</span>
         </div>

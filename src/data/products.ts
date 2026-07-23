@@ -222,7 +222,7 @@ export const products: Product[] = [
     weight: '1 кг',
     price: 199,
     oldPrice: 259,
-    image: '/images/products/catalog/fruit-sweetie.webp',
+    image: '/images/products/editorial/sweetie-fruit.webp',
     description:
       'Сочный цитрус с мягкой сладостью, свежим ароматом и деликатной кислинкой.',
     ingredients: 'Свити свежий.',
@@ -239,7 +239,7 @@ export const products: Product[] = [
     name: 'Помело сладкое',
     weight: '1 шт. · около 900 г',
     price: 249,
-    image: '/images/products/catalog/fruit-sweetie.webp',
+    image: '/images/products/editorial/pomelo-fruit.webp',
     description:
       'Крупный ароматный цитрус с сочными дольками и спокойным сладким вкусом.',
     ingredients: 'Помело свежее.',
@@ -257,7 +257,7 @@ export const products: Product[] = [
     weight: '130 г',
     price: 69,
     oldPrice: 89,
-    image: '/images/products/catalog/dairy-yogurt.webp',
+    image: '/images/products/editorial/pineapple-coconut-yogurt.webp',
     description:
       'Нежный молочный йогурт с тропическим вкусом ананаса и кокоса.',
     ingredients:
@@ -276,7 +276,7 @@ export const products: Product[] = [
     weight: '140 г',
     price: 359,
     oldPrice: 419,
-    image: '/images/products/catalog/goat-cheese.webp',
+    image: '/images/products/editorial/goat-cream-cheese.webp',
     description:
       'Мягкий сливочный сыр с лёгкой пикантностью козьего молока.',
     ingredients:
@@ -295,7 +295,7 @@ export const products: Product[] = [
     weight: '190 г',
     price: 1490,
     oldPrice: 1690,
-    image: '/images/products/catalog/beef-steak.webp',
+    image: '/images/products/editorial/striploin-steak.webp',
     description:
       'Охлаждённый стейк с плотной текстурой и выразительным мясным вкусом.',
     ingredients: 'Говядина охлаждённая.',
@@ -312,7 +312,7 @@ export const products: Product[] = [
     name: 'Медальоны из говядины',
     weight: '300 г',
     price: 899,
-    image: '/images/products/catalog/beef-steak.webp',
+    image: '/images/products/editorial/beef-medallions.webp',
     description:
       'Порционные кусочки охлаждённой говядины для быстрой обжарки.',
     ingredients: 'Говядина охлаждённая.',
@@ -330,7 +330,7 @@ export const products: Product[] = [
     weight: '330 г',
     price: 189,
     oldPrice: 229,
-    image: '/images/products/catalog/milk-sausages.webp',
+    image: '/images/products/editorial/milk-sausages.webp',
     description:
       'Нежные сосиски с мягким сливочным вкусом для завтрака или быстрого ужина.',
     ingredients:
@@ -348,7 +348,7 @@ export const products: Product[] = [
     name: 'Сосиски сливочные',
     weight: '350 г',
     price: 239,
-    image: '/images/products/catalog/milk-sausages.webp',
+    image: '/images/products/editorial/cream-sausages.webp',
     description:
       'Сочные сосиски с деликатным сливочным ароматом и тонкими специями.',
     ingredients:
@@ -367,7 +367,7 @@ export const products: Product[] = [
     weight: '400 г',
     price: 189,
     oldPrice: 229,
-    image: '/images/products/catalog/frozen-vegetables.webp',
+    image: '/images/products/editorial/frozen-potatoes-mushrooms.webp',
     description:
       'Готовая смесь картофеля и грибов для быстрого домашнего гарнира.',
     ingredients:
@@ -385,7 +385,7 @@ export const products: Product[] = [
     name: 'Овощная смесь по-деревенски',
     weight: '400 г',
     price: 179,
-    image: '/images/products/catalog/frozen-vegetables.webp',
+    image: '/images/products/editorial/frozen-country-vegetables.webp',
     description:
       'Овощное ассорти для запекания, сковороды или приготовления на пару.',
     ingredients:
@@ -404,7 +404,7 @@ export const products: Product[] = [
     weight: '750 мл',
     price: 949,
     oldPrice: 1190,
-    image: '/images/products/catalog/sparkling-wine.webp',
+    image: '/images/products/editorial/sparkling-asti.webp',
     description:
       'Ароматное белое игристое вино с фруктовыми и цветочными нотами.',
     ingredients: 'Виноградное вино, тиражный ликёр, диоксид серы.',
@@ -423,7 +423,7 @@ export const products: Product[] = [
     name: 'Вино игристое белое брют',
     weight: '750 мл',
     price: 1090,
-    image: '/images/products/catalog/sparkling-wine.webp',
+    image: '/images/products/editorial/sparkling-brut.webp',
     description:
       'Свежее игристое вино с тонким перляжем и сухим фруктовым послевкусием.',
     ingredients: 'Виноградное вино, тиражный ликёр, диоксид серы.',
@@ -443,7 +443,7 @@ export const products: Product[] = [
     weight: '70 г',
     price: 119,
     oldPrice: 149,
-    image: '/images/products/catalog/instant-noodles.webp',
+    image: '/images/products/editorial/creamy-tom-yum-noodles.webp',
     description:
       'Пряная лапша со сливочной нотой, лаймом и ароматом азиатских специй.',
     ingredients:
@@ -461,7 +461,7 @@ export const products: Product[] = [
     name: 'Лапша с овощами и специями',
     weight: '75 г',
     price: 99,
-    image: '/images/products/catalog/instant-noodles.webp',
+    image: '/images/products/editorial/vegetable-instant-noodles.webp',
     description:
       'Тонкая лапша с сушёными овощами и умеренно острым пряным бульоном.',
     ingredients:
@@ -480,7 +480,7 @@ export const products: Product[] = [
     weight: '80 г',
     price: 159,
     oldPrice: 189,
-    image: '/images/products/catalog/buckwheat-chips.webp',
+    image: '/images/products/editorial/buckwheat-corn-chips.webp',
     description:
       'Хрустящие цельнозерновые чипсы с лёгкой солью и вкусом злаков.',
     ingredients:
@@ -498,7 +498,7 @@ export const products: Product[] = [
     name: 'Хлебцы кукурузные с морской солью',
     weight: '90 г',
     price: 139,
-    image: '/images/products/catalog/buckwheat-chips.webp',
+    image: '/images/products/editorial/corn-crispbreads.webp',
     description:
       'Воздушные кукурузные хлебцы для лёгкого перекуса дома или в дороге.',
     ingredients: 'Кукурузная крупа, морская соль.',
@@ -515,7 +515,7 @@ export const products: Product[] = [
     name: 'Карамель-трость фруктовая',
     weight: '120 г · 8 шт.',
     price: 189,
-    image: '/images/products/catalog/candy-cane.webp',
+    image: '/images/products/editorial/fruit-candy-cane.webp',
     description:
       'Яркая фруктовая карамель в форме трости для сладкого подарка.',
     ingredients:
@@ -534,7 +534,7 @@ export const products: Product[] = [
     weight: '1 шт. · 19 см',
     price: 999,
     oldPrice: 1190,
-    image: '/images/products/catalog/plush-rabbit.webp',
+    image: '/images/products/editorial/plush-rabbit.webp',
     description:
       'Мягкий плюшевый кролик спокойного кремового оттенка для детской комнаты.',
     ingredients: 'Полиэстер, текстильный наполнитель, вышитые элементы.',
@@ -551,7 +551,7 @@ export const products: Product[] = [
     name: 'Мягкая игрушка Зайчонок',
     weight: '1 шт. · 24 см',
     price: 1290,
-    image: '/images/products/catalog/plush-rabbit.webp',
+    image: '/images/products/editorial/plush-bunny.webp',
     description:
       'Уютная мягкая игрушка с длинными ушами и безопасными вышитыми деталями.',
     ingredients: 'Полиэстер, текстильный наполнитель, вышитые элементы.',
@@ -568,7 +568,7 @@ export const products: Product[] = [
     name: 'Ягодный напиток растворимый без сахара',
     weight: '12 г',
     price: 59,
-    image: '/images/products/catalog/healthy-berry-drink.webp',
+    image: '/images/products/editorial/instant-berry-drink.webp',
     description:
       'Порционная сухая смесь для ягодного напитка с насыщенным вкусом.',
     ingredients:
@@ -587,7 +587,7 @@ export const products: Product[] = [
     weight: '5 пакетиков · 60 г',
     price: 249,
     oldPrice: 289,
-    image: '/images/products/catalog/healthy-berry-drink.webp',
+    image: '/images/products/editorial/vitamin-berry-drink.webp',
     description:
       'Ягодный напиток в порционных пакетиках с витамином C и мягкой кислинкой.',
     ingredients:
@@ -606,7 +606,7 @@ export const products: Product[] = [
     weight: '18 пакетиков · 27 г',
     price: 219,
     oldPrice: 259,
-    image: '/images/products/catalog/green-tea.webp',
+    image: '/images/products/editorial/peach-vanilla-green-tea.webp',
     description:
       'Лёгкий зелёный чай с ароматом спелого персика и мягкой ванильной нотой.',
     ingredients:
@@ -624,7 +624,7 @@ export const products: Product[] = [
     name: 'Чай чёрный с бергамотом',
     weight: '20 пакетиков · 40 г',
     price: 189,
-    image: '/images/products/catalog/green-tea.webp',
+    image: '/images/products/editorial/bergamot-black-tea.webp',
     description:
       'Насыщенный чёрный чай с чистым цитрусовым ароматом бергамота.',
     ingredients:
@@ -643,7 +643,7 @@ export const products: Product[] = [
     weight: '1 шт. · 9 см',
     price: 649,
     oldPrice: 749,
-    image: '/images/products/catalog/home-figurine.webp',
+    image: '/images/products/editorial/porcelain-snake-figurine.webp',
     description:
       'Небольшая фарфоровая фигурка для полки, рабочего стола или подарка.',
     ingredients: 'Фарфор, декоративная глазурь.',
@@ -660,7 +660,7 @@ export const products: Product[] = [
     name: 'Декоративная фигурка для дома',
     weight: '1 шт. · 12 см',
     price: 799,
-    image: '/images/products/catalog/home-figurine.webp',
+    image: '/images/products/editorial/decorative-home-figurine.webp',
     description:
       'Лаконичный декоративный акцент для уютного современного интерьера.',
     ingredients: 'Фарфор, декоративная глазурь.',
@@ -678,7 +678,7 @@ export const products: Product[] = [
     weight: '160 мл',
     price: 329,
     oldPrice: 379,
-    image: '/images/products/catalog/after-sun-gel.webp',
+    image: '/images/products/editorial/aloe-after-sun-gel.webp',
     description:
       'Лёгкий охлаждающий гель, который смягчает и увлажняет кожу после солнца.',
     ingredients:
@@ -696,7 +696,7 @@ export const products: Product[] = [
     name: 'Гель для тела с алоэ вера',
     weight: '200 мл',
     price: 349,
-    image: '/images/products/catalog/after-sun-gel.webp',
+    image: '/images/products/editorial/aloe-body-gel.webp',
     description:
       'Универсальный увлажняющий гель с нежной текстурой и свежим ароматом.',
     ingredients:
@@ -714,7 +714,7 @@ export const products: Product[] = [
     name: 'Паштет для кошек с телятиной',
     weight: '75 г',
     price: 49,
-    image: '/images/products/catalog/cat-food.webp',
+    image: '/images/products/editorial/veal-cat-pate.webp',
     description:
       'Полнорационный влажный корм с нежной текстурой паштета.',
     ingredients:
@@ -733,7 +733,7 @@ export const products: Product[] = [
     weight: '75 г',
     price: 55,
     oldPrice: 65,
-    image: '/images/products/catalog/cat-food.webp',
+    image: '/images/products/editorial/turkey-kitten-pate.webp',
     description:
       'Мягкий полнорационный паштет, разработанный для растущих котят.',
     ingredients:
@@ -751,7 +751,7 @@ export const products: Product[] = [
     name: 'Тетрадь в клетку серая',
     weight: '40 листов · 1 шт.',
     price: 165,
-    image: '/images/products/catalog/notebook.webp',
+    image: '/images/products/editorial/grey-grid-notebook.webp',
     description:
       'Компактная тетрадь в спокойной серой обложке для записей и учёбы.',
     ingredients: 'Бумага офсетная, картон, металлические скобы.',
@@ -769,7 +769,7 @@ export const products: Product[] = [
     weight: '96 листов · 1 шт.',
     price: 389,
     oldPrice: 449,
-    image: '/images/products/catalog/notebook.webp',
+    image: '/images/products/editorial/grey-undated-planner.webp',
     description:
       'Недатированный ежедневник с лаконичной обложкой и удобной разлиновкой.',
     ingredients: 'Бумага офсетная, картон, текстильная закладка.',

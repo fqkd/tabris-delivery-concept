@@ -8,6 +8,10 @@ import '@fontsource/manrope/cyrillic-800.css'
 import './index.css'
 import App from './App.tsx'
 
+if ('scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual'
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

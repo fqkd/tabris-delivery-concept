@@ -1,8 +1,8 @@
 import {
   catalogCategories,
   getCategoryLabel,
-} from '../data/catalogCategories'
-import { discountPercent } from './format'
+} from '../data/catalogCategories.ts'
+import { discountPercent } from './format.ts'
 import type {
   CatalogFilters,
   CatalogSort,
@@ -89,3 +89,11 @@ export const isProductCategoryId = (
   value: string,
 ): value is ProductCategoryId =>
   catalogCategories.some((category) => category.id === value)
+
+export const getCategoryProductCounts = (catalog: Product[]) =>
+  new Map(
+    catalogCategories.map((category) => [
+      category.id,
+      catalog.filter((product) => product.categoryId === category.id).length,
+    ]),
+  )

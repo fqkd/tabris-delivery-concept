@@ -13,6 +13,7 @@ import { useShop } from './context/ShopContext'
 import { ShopProvider } from './context/ShopProvider'
 import { BonusPage } from './pages/BonusPage'
 import { CartPage } from './pages/CartPage'
+import { CatalogCategoriesPage } from './pages/CatalogCategoriesPage'
 import { CatalogPage } from './pages/CatalogPage'
 import { CategoryPage } from './pages/CategoryPage'
 import { CheckoutPage } from './pages/CheckoutPage'
@@ -38,6 +39,9 @@ const bottomNavPaths = new Set([
 const getPageTitle = (pathname: string) => {
   if (pathname === '/') return 'Главная — доставка «Табрис»'
   if (pathname === '/catalog') return 'Каталог — доставка «Табрис»'
+  if (pathname === '/catalog/categories') {
+    return 'Все категории — доставка «Табрис»'
+  }
   if (pathname === '/cart') return 'Корзина — доставка «Табрис»'
   if (pathname === '/checkout') return 'Оформление — доставка «Табрис»'
   if (/^\/orders\/[^/]+\/success$/.test(pathname)) {
@@ -73,6 +77,8 @@ function ScrollManager() {
   const savedCatalogScroll = useRef(search.scrollTop)
   const lastKnownCatalogScroll = useRef(search.scrollTop)
   const saveCatalogScroll = useRef(setSearchScrollTop)
+  const initialPathname = useRef(location.pathname)
+  const hasLeftInitialRoute = useRef(false)
 
   savedCatalogScroll.current = search.scrollTop
   saveCatalogScroll.current = setSearchScrollTop
@@ -81,8 +87,15 @@ function ScrollManager() {
     const scroller = document.querySelector<HTMLElement>('.app-scroll')
     if (!scroller) return
 
+    if (location.pathname !== initialPathname.current) {
+      hasLeftInitialRoute.current = true
+    }
+    const appJustLoaded = !hasLeftInitialRoute.current
     const catalogRoute = location.pathname === '/catalog'
-    scroller.scrollTo({ top: catalogRoute ? savedCatalogScroll.current : 0 })
+    const restoreCatalogScroll = catalogRoute && !appJustLoaded
+    scroller.scrollTo({
+      top: restoreCatalogScroll ? savedCatalogScroll.current : 0,
+    })
 
     if (!catalogRoute) return
 
@@ -113,6 +126,10 @@ function AppFrame() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/catalog" element={<CatalogPage />} />
+          <Route
+            path="/catalog/categories"
+            element={<CatalogCategoriesPage />}
+          />
           <Route path="/category/own-production" element={<CategoryPage />} />
           <Route path="/product/:productId" element={<ProductPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
