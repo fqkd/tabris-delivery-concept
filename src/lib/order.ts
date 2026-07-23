@@ -117,22 +117,22 @@ export const buildTrackingTimeline = (order: OrderSnapshot): TrackingStep[] => {
   {
     id: 'assembling',
     label: 'Собираем заказ',
-    description: 'Подбираем свежие продукты и готовые блюда',
+    description: 'Товары подобраны и бережно упакованы',
   },
   {
     id: 'courier',
     label: 'Передали курьеру',
-    description: 'Заказ будет бережно упакован для доставки',
+    description: 'Курьер получил заказ в магазине',
   },
   {
     id: 'delivering',
     label: 'Доставляем',
-    description: 'Условный маршрут появится на этом этапе',
+    description: 'Курьер следует по демо-маршруту к адресу',
   },
   {
     id: 'delivered',
     label: 'Заказ доставлен',
-    description: 'Всё готово — приятного аппетита',
+    description: 'Появится после вручения заказа',
   },
   ]
   const statusOrder: OrderSnapshot['status'][] = [

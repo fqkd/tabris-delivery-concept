@@ -23,6 +23,20 @@ export const defaultProfile: DemoProfile = {
   phone: '+7 ••• •••-42-18',
 }
 
+export const deliveryCities = [
+  'Краснодар',
+  'Анапа',
+  'Геленджик',
+  'Новороссийск',
+  'Сочи',
+] as const
+
+export type DeliveryCity = (typeof deliveryCities)[number]
+
+export const isDeliveryCity = (value: unknown): value is DeliveryCity =>
+  typeof value === 'string' &&
+  deliveryCities.includes(value as DeliveryCity)
+
 export const favoriteCategoryIds: ProductCategoryId[] = [
   'own-production',
   'cheese',

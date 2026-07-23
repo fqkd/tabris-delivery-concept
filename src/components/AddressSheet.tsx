@@ -1,14 +1,21 @@
 import {
   Check,
-  ChevronDown,
   Clock3,
   MapPin,
   Navigation,
   X,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import {
+  deliveryCities,
+  isDeliveryCity,
+  type DeliveryCity,
+} from '../config/demoRules'
 import { useShop } from '../context/ShopContext'
 import { getNearestDeliveryTimeLabel } from '../lib/deliveryDates'
+
+const getInitialCity = (city: string | undefined): DeliveryCity =>
+  isDeliveryCity(city) ? city : deliveryCities[0]
 
 export function AddressSheet() {
   const {
@@ -17,7 +24,9 @@ export function AddressSheet() {
     closeAddress,
     confirmAddress,
   } = useShop()
-  const [city, setCity] = useState(address?.city ?? 'Краснодар')
+  const [city, setCity] = useState<DeliveryCity>(() =>
+    getInitialCity(address?.city),
+  )
   const [street, setStreet] = useState(address?.street ?? '')
   const dialogRef = useRef<HTMLElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -26,7 +35,7 @@ export function AddressSheet() {
 
   useEffect(() => {
     if (isAddressOpen) {
-      setCity(address?.city ?? 'Краснодар')
+      setCity(getInitialCity(address?.city))
       setStreet(address?.street ?? '')
       previousFocusRef.current = document.activeElement as HTMLElement | null
       window.requestAnimationFrame(() => inputRef.current?.focus())
@@ -70,6 +79,18 @@ export function AddressSheet() {
 
   if (!isAddressOpen) return null
 
+  const chooseCity = (nextCity: DeliveryCity) => {
+    setCity(nextCity)
+    const confirmedStreet = street.trim()
+    if (!confirmedStreet) return
+
+    confirmAddress({
+      city: nextCity,
+      street: confirmedStreet,
+      deliveryTime: nearestDeliveryTime,
+    })
+  }
+
   return (
     <div className="sheet-overlay" role="presentation">
       <button
@@ -101,22 +122,27 @@ export function AddressSheet() {
           </button>
         </div>
 
-        <label className="field-label" htmlFor="delivery-city">
-          Город
-        </label>
-        <div className="select-field">
-          <MapPin aria-hidden="true" />
-          <select
-            id="delivery-city"
-            value={city}
-            onChange={(event) => setCity(event.target.value)}
-          >
-            <option>Краснодар</option>
-            <option>Сочи</option>
-            <option>Новороссийск</option>
-          </select>
-          <ChevronDown aria-hidden="true" />
-        </div>
+        <fieldset className="city-picker">
+          <legend className="field-label">Город</legend>
+          <div className="city-picker__options">
+            {deliveryCities.map((deliveryCity) => {
+              const selected = city === deliveryCity
+              return (
+                <button
+                  key={deliveryCity}
+                  type="button"
+                  className={selected ? 'is-selected' : undefined}
+                  aria-pressed={selected}
+                  onClick={() => chooseCity(deliveryCity)}
+                >
+                  <MapPin aria-hidden="true" />
+                  <span>{deliveryCity}</span>
+                  {selected && <Check aria-hidden="true" />}
+                </button>
+              )
+            })}
+          </div>
+        </fieldset>
 
         <label className="field-label" htmlFor="delivery-address">
           Адрес

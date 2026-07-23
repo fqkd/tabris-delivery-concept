@@ -3,6 +3,7 @@ import {
   defaultFilters,
   defaultProfile,
   defaultSearchState,
+  isDeliveryCity,
 } from '../config/demoRules'
 import { productIds } from '../data/products'
 import { isProductCategoryId } from './catalog'
@@ -82,7 +83,7 @@ export const sanitizeCart = (value: unknown): CartState => {
 
 const sanitizeAddress = (value: unknown): DeliveryAddress | null => {
   if (!isRecord(value)) return null
-  const city = safeString(value.city, '', 50)
+  const city = isDeliveryCity(value.city) ? value.city : ''
   const street = safeString(value.street, '', 100)
   if (!city || !street) return null
 
