@@ -1,6 +1,6 @@
-import { defaultFilters } from '../config/demoRules'
-import { productIds } from '../data/products'
-import { mergeCartAdditions, normalizeQuantity } from '../lib/cart'
+import { defaultFilters } from '../config/demoRules.ts'
+import { productIds } from '../data/products.ts'
+import { mergeCartAdditions, normalizeQuantity } from '../lib/cart.ts'
 import type {
   CatalogFilters,
   CatalogSort,
@@ -141,20 +141,18 @@ export const shopReducer = (
   }
 
   if (action.type === 'SAVE_ORDER') {
-    if (state.lastOrder?.id === action.order.id) return state
+    if (state.orders.some((order) => order.id === action.order.id)) return state
     return {
       ...state,
-      lastOrder: action.order,
+      orders: [action.order, ...state.orders].slice(0, 20),
+      lastOrderId: action.order.id,
       bonusBalance: action.order.bonusBalanceAfter,
       pendingCartClearOrderId: action.order.id,
     }
   }
 
   if (action.type === 'CLEAR_ORDERED_CART') {
-    if (
-      state.lastOrder?.id !== action.orderId ||
-      state.pendingCartClearOrderId !== action.orderId
-    ) {
+    if (state.pendingCartClearOrderId !== action.orderId) {
       return state
     }
     return { ...state, cart: {}, pendingCartClearOrderId: null }

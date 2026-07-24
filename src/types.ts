@@ -123,10 +123,23 @@ export type OrderStatus =
   | 'delivering'
   | 'delivered'
 
+export type OrderStatusEvent = {
+  status: OrderStatus
+  occurredAt: string
+}
+
+export type OrderEta = {
+  minMinutes: number
+  maxMinutes: number
+}
+
 export type OrderSnapshot = {
   id: string
   createdAt: string
   status: OrderStatus
+  statusEvents: OrderStatusEvent[]
+  eta?: OrderEta
+  courierLocationUpdatedAt?: string
   address: DeliveryAddress
   deliverySlot: DeliverySlot
   recipient: DemoProfile
@@ -148,7 +161,8 @@ export type PersistedShopState = {
   profile: DemoProfile
   electronicReceipts: boolean
   bonusBalance: number
-  lastOrder: OrderSnapshot | null
+  orders: OrderSnapshot[]
+  lastOrderId: string | null
   pendingCartClearOrderId: string | null
 }
 

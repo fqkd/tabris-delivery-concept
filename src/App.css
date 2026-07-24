@@ -4304,6 +4304,11 @@ fieldset.checkout-section {
   grid-template-columns: 40px minmax(0, 1fr) 18px;
 }
 
+.profile-order-list {
+  display: grid;
+  gap: 10px;
+}
+
 .profile-order-card__copy > span:first-child {
   display: flex;
   align-items: flex-start;

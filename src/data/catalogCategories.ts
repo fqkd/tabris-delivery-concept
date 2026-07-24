@@ -63,7 +63,7 @@ export const catalogCategories: CatalogCategory[] = [
   },
   {
     id: 'coffee-tea-cocoa',
-    label: 'Кофе, Чай, Какао',
+    label: 'Кофе, чай, какао',
   },
   {
     id: 'household',
@@ -71,7 +71,7 @@ export const catalogCategories: CatalogCategory[] = [
   },
   {
     id: 'cosmetics-hygiene',
-    label: 'Косметика гигиена',
+    label: 'Косметика и гигиена',
   },
   {
     id: 'pets',

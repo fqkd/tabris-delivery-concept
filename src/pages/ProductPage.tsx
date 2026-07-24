@@ -25,7 +25,7 @@ export function ProductPage() {
     return (
       <main className="screen product-not-found">
         <h1>Товар не найден</h1>
-        <button type="button" onClick={() => navigate('/category/own-production')}>
+        <button type="button" onClick={() => navigate('/catalog')}>
           Вернуться в каталог
         </button>
       </main>
@@ -76,7 +76,11 @@ export function ProductPage() {
               type="button"
               className="icon-button icon-button--surface icon-button--badged"
               aria-label="Открыть корзину"
-              onClick={() => navigate('/cart')}
+              onClick={() =>
+                navigate('/cart', {
+                  state: { from: location.pathname },
+                })
+              }
             >
               <ShoppingBag aria-hidden="true" />
               {cartCount > 0 && <span>{cartCount > 9 ? '9+' : cartCount}</span>}
@@ -161,7 +165,11 @@ export function ProductPage() {
               <button
                 type="button"
                 className="primary-button product-purchase-bar__cart"
-                onClick={() => navigate('/cart')}
+                onClick={() =>
+                  navigate('/cart', {
+                    state: { from: location.pathname },
+                  })
+                }
               >
                 В корзину · {formatPrice(product.price * quantity)} ₽
               </button>

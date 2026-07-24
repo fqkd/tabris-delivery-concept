@@ -18,15 +18,7 @@ import { useShop } from '../context/ShopContext'
 import { products } from '../data/products'
 import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice } from '../lib/format'
-import type { OrderStatus } from '../types'
-
-const orderStatusLabels: Record<OrderStatus, string> = {
-  placed: 'Заказ оформлен',
-  assembling: 'Собираем заказ',
-  courier: 'Передали курьеру',
-  delivering: 'Доставляем',
-  delivered: 'Заказ доставлен',
-}
+import { orderStatusLabels } from '../lib/order'
 
 export function ProfilePage() {
   const navigate = useNavigate()
@@ -35,17 +27,13 @@ export function ProfilePage() {
     address,
     openAddress,
     favoriteIds,
-    lastOrder,
+    orders,
   } = useShop()
 
   const favoriteProducts = useMemo(
     () => products.filter((product) => favoriteIds.includes(product.id)),
     [favoriteIds],
   )
-  const lastOrderDeliveryDate = lastOrder
-    ? formatSavedDeliveryDate(lastOrder.deliverySlot)
-    : null
-
   return (
     <main className="screen screen--profile has-bottom-nav">
       <PageHeader title="Профиль" backTo="/" />
@@ -120,36 +108,51 @@ export function ProfilePage() {
         <div className="profile-section__heading">
           <div>
             <span>Покупки</span>
-            <h2 id="profile-order-title">Последний заказ</h2>
+            <h2 id="profile-order-title">История заказов</h2>
           </div>
         </div>
 
-        {lastOrder ? (
-          <button
-            type="button"
-            className="profile-order-card"
-            onClick={() => navigate(`/orders/${lastOrder.id}/tracking`)}
-          >
-            <span className="profile-order-card__icon" aria-hidden="true">
-              <PackageCheck />
-            </span>
-            <span className="profile-order-card__copy">
-              <span>
-                <strong>{lastOrder.id}</strong>
-                <small>{orderStatusLabels[lastOrder.status]}</small>
-              </span>
-              <span className="profile-order-card__meta">
-                <span>
-                  <Clock3 aria-hidden="true" />
-                  {lastOrderDeliveryDate?.dayLabel},{' '}
-                  {lastOrderDeliveryDate?.dateLabel},{' '}
-                  {lastOrder.deliverySlot.timeLabel}
-                </span>
-                <span>{formatPrice(lastOrder.totals.payableTotal)} ₽</span>
-              </span>
-            </span>
-            <ChevronRight aria-hidden="true" />
-          </button>
+        {orders.length > 0 ? (
+          <div className="profile-order-list">
+            {orders.map((order) => {
+              const deliveryDate = formatSavedDeliveryDate(order.deliverySlot)
+
+              return (
+                <button
+                  key={order.id}
+                  type="button"
+                  className="profile-order-card"
+                  onClick={() =>
+                    navigate(`/orders/${encodeURIComponent(order.id)}/tracking`, {
+                      state: { from: '/profile' },
+                    })
+                  }
+                >
+                  <span
+                    className="profile-order-card__icon"
+                    aria-hidden="true"
+                  >
+                    <PackageCheck />
+                  </span>
+                  <span className="profile-order-card__copy">
+                    <span>
+                      <strong>{order.id}</strong>
+                      <small>{orderStatusLabels[order.status]}</small>
+                    </span>
+                    <span className="profile-order-card__meta">
+                      <span>
+                        <Clock3 aria-hidden="true" />
+                        {deliveryDate.dayLabel}, {deliveryDate.dateLabel},{' '}
+                        {order.deliverySlot.timeLabel}
+                      </span>
+                      <span>{formatPrice(order.totals.payableTotal)} ₽</span>
+                    </span>
+                  </span>
+                  <ChevronRight aria-hidden="true" />
+                </button>
+              )
+            })}
+          </div>
         ) : (
           <div className="profile-empty-state">
             <span aria-hidden="true">

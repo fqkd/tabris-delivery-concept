@@ -145,7 +145,11 @@ export function HomePage() {
       <button type="button" className="address-bar" onClick={openAddress}>
         <span>
           <small>{address ? 'Доставим по адресу' : 'Адрес доставки'}</small>
-          <strong>{address?.street ?? 'Выберите адрес'}</strong>
+          <strong>
+            {address
+              ? `${address.city} · ${address.street}`
+              : 'Выберите адрес'}
+          </strong>
         </span>
         <ChevronDown aria-hidden="true" />
         <span className="address-bar__time">

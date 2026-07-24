@@ -1,11 +1,12 @@
-import { getCartItems } from './cart'
-import { roundBonusAmount } from './bonus'
+import { getCartItems } from './cart.ts'
+import { roundBonusAmount } from './bonus.ts'
 import type {
   CartState,
   DeliveryAddress,
   DeliverySlot,
   DemoProfile,
   OrderSnapshot,
+  OrderStatus,
   OrderTotals,
   PaymentMethod,
   SubstitutionPolicy,
@@ -71,7 +72,13 @@ export const createOrderSnapshot = (
 ): OrderSnapshot => ({
   id: input.id,
   createdAt: input.createdAt,
-  status: 'assembling',
+  status: 'placed',
+  statusEvents: [
+    {
+      status: 'placed',
+      occurredAt: input.createdAt,
+    },
+  ],
   address: input.address,
   deliverySlot: input.deliverySlot,
   recipient: input.recipient,
@@ -96,44 +103,54 @@ export const createOrderSnapshot = (
 })
 
 export type TrackingStep = {
-  id: string
+  id: OrderStatus
   label: string
   description: string
   time?: string
   state: 'complete' | 'current' | 'upcoming'
 }
 
+export const orderStatusLabels: Record<OrderStatus, string> = {
+  placed: 'Заказ оформлен',
+  assembling: 'Собираем заказ',
+  courier: 'Передали курьеру',
+  delivering: 'Доставляем',
+  delivered: 'Заказ доставлен',
+}
+
+const formatEventTime = (occurredAt: string) =>
+  new Intl.DateTimeFormat('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(occurredAt))
+
 export const buildTrackingTimeline = (order: OrderSnapshot): TrackingStep[] => {
-  const steps: Omit<TrackingStep, 'state'>[] = [
+  const steps: Omit<TrackingStep, 'state' | 'time'>[] = [
     {
-    id: 'placed',
-    label: 'Заказ оформлен',
-    description: 'Мы получили заказ и проверили данные',
-    time: new Intl.DateTimeFormat('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(order.createdAt)),
-  },
-  {
-    id: 'assembling',
-    label: 'Собираем заказ',
-    description: 'Товары подобраны и бережно упакованы',
-  },
-  {
-    id: 'courier',
-    label: 'Передали курьеру',
-    description: 'Курьер получил заказ в магазине',
-  },
-  {
-    id: 'delivering',
-    label: 'Доставляем',
-    description: 'Курьер следует по демо-маршруту к адресу',
-  },
-  {
-    id: 'delivered',
-    label: 'Заказ доставлен',
-    description: 'Появится после вручения заказа',
-  },
+      id: 'placed',
+      label: orderStatusLabels.placed,
+      description: 'Мы получили заказ и проверили данные',
+    },
+    {
+      id: 'assembling',
+      label: orderStatusLabels.assembling,
+      description: 'Подбираем товары и бережно упаковываем их',
+    },
+    {
+      id: 'courier',
+      label: orderStatusLabels.courier,
+      description: 'Курьер получил заказ в магазине',
+    },
+    {
+      id: 'delivering',
+      label: orderStatusLabels.delivering,
+      description: 'Курьер следует по демо-маршруту к адресу',
+    },
+    {
+      id: 'delivered',
+      label: orderStatusLabels.delivered,
+      description: 'Появится после вручения заказа',
+    },
   ]
   const statusOrder: OrderSnapshot['status'][] = [
     'placed',
@@ -144,13 +161,20 @@ export const buildTrackingTimeline = (order: OrderSnapshot): TrackingStep[] => {
   ]
   const currentIndex = Math.max(0, statusOrder.indexOf(order.status))
 
-  return steps.map((step, index) => ({
-    ...step,
-    state:
-      index < currentIndex
-        ? 'complete'
-        : index === currentIndex
-          ? 'current'
-          : 'upcoming',
-  }))
+  return steps.map((step, index) => {
+    const event = order.statusEvents.find(
+      (statusEvent) => statusEvent.status === step.id,
+    )
+
+    return {
+      ...step,
+      ...(event ? { time: formatEventTime(event.occurredAt) } : {}),
+      state:
+        index < currentIndex
+          ? 'complete'
+          : index === currentIndex
+            ? 'current'
+            : 'upcoming',
+    }
+  })
 }

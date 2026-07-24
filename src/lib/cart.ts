@@ -1,11 +1,11 @@
-import { DEMO_RULES, favoriteCategoryIds } from '../config/demoRules'
-import { products } from '../data/products'
+import { DEMO_RULES, favoriteCategoryIds } from '../config/demoRules.ts'
+import { products } from '../data/products.ts'
 import {
   calculateEarnedBonus,
   calculateMaximumBonusSpend,
   clampBonusSpend,
   type BonusCalculationLine,
-} from './bonus'
+} from './bonus.ts'
 import type { CartAddition, CartState, OrderTotals, Product } from '../types'
 
 export type CartItem = {
