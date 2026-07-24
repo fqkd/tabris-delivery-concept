@@ -120,7 +120,7 @@ const SearchSequence = ({
         width="358"
         height="50"
       />
-      <span>Реальный поиск по каталогу</span>
+      <span>Запрос «стейк» и результаты каталога</span>
     </div>
   )
 }
@@ -193,7 +193,7 @@ export function CasePage() {
           />
           <span>Табрис Доставка</span>
         </a>
-        <span className="case-nav__note">Неофициальная концепция</span>
+        <span className="case-nav__note">Инициативная концепция</span>
         <PrototypeLink className="case-nav__prototype">
           Прототип
           <ExternalLink aria-hidden="true" />
@@ -216,12 +216,12 @@ export function CasePage() {
                 </span>
               </h1>
               <p>
-                Инициативная интерактивная концепция мобильного сервиса: от
-                вдохновения и выбора еды до понятной доставки домой.
+                Рабочий прототип мобильной доставки с идеями для ужина,
+                собственной кухней и понятным статусом заказа.
               </p>
               <div className="case-actions">
                 <a className="case-button case-button--primary" href="#idea">
-                  Смотреть концепцию
+                  Смотреть кейс
                   <ArrowDown aria-hidden="true" />
                 </a>
                 <PrototypeLink className="case-button case-button--secondary">
@@ -293,12 +293,11 @@ export function CasePage() {
         <section className="case-section case-idea" id="idea">
           <div className="case-container case-idea__layout">
             <div className="case-idea__statement" data-reveal>
-              <span className="case-section-number">01 · Продуктовая идея</span>
-              <h2>Не переносить супермаркет в смартфон</h2>
+              <span className="case-section-number">01 · Зачем этот сервис</span>
+              <h2>Начать с вопроса «что приготовить?»</h2>
               <p>
-                Концепция переносит в цифровую среду главное качество
-                «Табриса» — способность помочь выбрать вкусную еду и уверенно
-                получить её дома.
+                На главной собраны готовые блюда, собственная кухня и сценарий
+                ужина. Каталог доступен через поиск и категории.
               </p>
               <div className="case-idea__line" aria-hidden="true">
                 <span />
@@ -317,7 +316,7 @@ export function CasePage() {
                   height="600"
                   loading="lazy"
                 />
-                <span>Выбор начинается с аппетита, а не с фильтра</span>
+                <span>Сначала аппетит, затем фильтры</span>
               </div>
             </div>
           </div>
@@ -326,7 +325,7 @@ export function CasePage() {
         <section className="case-section case-principles">
           <div className="case-container">
             <div className="case-heading" data-reveal>
-              <span className="case-section-number">02 · Три принципа</span>
+              <span className="case-section-number">02 · Три ориентира</span>
               <h2>Вдохновить. Упростить. Успокоить.</h2>
             </div>
             <div className="principle-list">
@@ -336,8 +335,8 @@ export function CasePage() {
                   <Sparkles aria-hidden="true" />
                   <h3>Вдохновить</h3>
                   <p>
-                    Готовые блюда, собственное производство и сценарии выбора
-                    помогают придумать ужин.
+                    Подборки и готовые блюда помогают решить, что приготовить
+                    на ужин.
                   </p>
                 </div>
                 <div className="principle__screen">
@@ -356,8 +355,8 @@ export function CasePage() {
                   <Search aria-hidden="true" />
                   <h3>Упростить</h3>
                   <p>
-                    Поиск, категории и понятная карточка сокращают путь до
-                    уверенного выбора.
+                    Поиск, категории и карточка товара помогают быстро сузить
+                    выбор.
                   </p>
                 </div>
                 <div className="principle__screen">
@@ -376,8 +375,8 @@ export function CasePage() {
                   <Truck aria-hidden="true" />
                   <h3>Успокоить</h3>
                   <p>
-                    Интервалы, замены и честные статусы объясняют, что
-                    происходит с заказом.
+                    До оплаты видны дата и правила замен. После — только
+                    подтверждённые этапы.
                   </p>
                 </div>
                 <div className="principle__screen">
@@ -398,12 +397,12 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading case-heading--center" data-reveal>
               <span className="case-section-number">
-                03 · Гастрономическое вдохновение
+                03 · Идея для ужина
               </span>
-              <h2>Сначала — идея для ужина. Потом — товары</h2>
+              <h2>Ужин начинается с идеи</h2>
               <p>
-                Главный экран начинает разговор не с бесконечной сетки, а с
-                готового сценария, который можно изменить под себя.
+                Пользователь выбирает сценарий, меняет состав и получает
+                готовый набор на двоих.
               </p>
             </div>
             <div className="case-dinner__table" data-reveal>
@@ -457,12 +456,12 @@ export function CasePage() {
           <div className="case-container case-kitchen__layout">
             <div className="case-kitchen__copy" data-reveal>
               <span className="case-section-number">
-                04 · Собственное производство
+                04 · Готовые блюда
               </span>
-              <h2>Собственная кухня — в центре выбора</h2>
+              <h2>Готовые блюда — отдельная витрина</h2>
               <p>
-                Готовые блюда и собственное производство получают
-                самостоятельную роль, а не теряются среди общего каталога.
+                Сырники, салаты, роллы и горячие блюда собраны в своём разделе
+                и показаны крупными фотографиями.
               </p>
               <div className="case-kitchen__product-grid">
                 {[
@@ -497,11 +496,12 @@ export function CasePage() {
         >
           <div className="case-container">
             <div className="case-heading case-heading--center" data-reveal>
-              <span className="case-section-number">05 · Каталог и товар</span>
-              <h2>Всё необходимое, чтобы выбрать уверенно</h2>
+              <span className="case-section-number">05 · Поиск и товар</span>
+              <h2>Выбрать без догадок</h2>
               <p>
-                Основное доказательство — сам интерфейс: фотография, состав,
-                вес, цена, бонусы, наличие и происхождение товара.
+                В карточке видны состав, вес, цена, бонусы, наличие и срок
+                годности. Поиск и категории помогают быстрее найти нужный
+                товар.
               </p>
             </div>
             <div className="case-catalog__stage" data-reveal>
@@ -532,7 +532,7 @@ export function CasePage() {
                 <span>220 г</span>
                 <span>359 ₽</span>
                 <span>−14%</span>
-                <span>Состав и срок годности</span>
+                <span>Состав, хранение, срок годности</span>
               </div>
             </div>
           </div>
@@ -542,13 +542,13 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading" data-reveal>
               <span className="case-section-number">
-                06 · Единый пользовательский путь
+                06 · Один заказ
               </span>
-              <h2>Один спокойный сценарий — от адреса до двери</h2>
+              <h2>Ужин на завтра, шаг за шагом</h2>
               <p>
-                Покупатель в Краснодаре планирует ужин на завтра, выбирает
-                продукты и готовое блюдо, оформляет доставку и следит за
-                заказом.
+                Адрес в Краснодаре, набор продуктов, интервал 10:00–12:00 и
+                заказ в пути. Этот же заказ продолжается на экранах оформления
+                и отслеживания.
               </p>
             </div>
             <ol className="journey-path" data-reveal>
@@ -614,29 +614,29 @@ export function CasePage() {
           <div className="case-container case-checkout__layout">
             <div className="case-checkout__copy" data-reveal>
               <span className="case-section-number">
-                07 · Оформление доставки
+                07 · Оформление
               </span>
-              <h2>Доставка понятна до подтверждения заказа</h2>
+              <h2>Все условия видны заранее</h2>
               <p>
-                Адрес, будущая дата, интервал, получатель, замены, оплата и
-                бонусы собраны в одном последовательном оформлении.
+                На одном экране видны адрес, дата, интервал, замены, оплата и
+                бонусы.
               </p>
               <ul>
                 <li>
                   <Check aria-hidden="true" />
-                  Доставка на завтра
+                  Завтра, 10:00–12:00
                 </li>
                 <li>
                   <Check aria-hidden="true" />
-                  Интервал 10:00–12:00
+                  Получатель указан
                 </li>
                 <li>
                   <Check aria-hidden="true" />
-                  Замена только после согласования
+                  Замена после согласования
                 </li>
                 <li>
                   <Check aria-hidden="true" />
-                  Итог и бонусы до подтверждения
+                  Итог и бонусы посчитаны
                 </li>
               </ul>
             </div>
@@ -668,7 +668,7 @@ export function CasePage() {
                 </div>
               </figure>
               <div className="case-checkout__interval">
-                <span>Будущая дата и интервал</span>
+                <span>Завтра · 10:00–12:00</span>
                 <img
                   src={`${screenshots}/checkout-interval.webp`}
                   alt="Выбранный интервал доставки на завтра"
@@ -685,13 +685,12 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading case-heading--center" data-reveal>
               <span className="case-section-number">
-                08 · Честное начало заказа
+                08 · Новый заказ
               </span>
-              <h2>Без ложного ожидания курьера</h2>
+              <h2>Заказ принят. Курьер ещё не выехал</h2>
               <p>
-                Сразу после оформления сервис показывает только подтверждённые
-                этапы. Карта и время прибытия появляются, когда заказ
-                действительно передан в доставку.
+                После оформления активен только первый этап. Карта и время
+                прибытия появятся после передачи заказа курьеру.
               </p>
             </div>
             <div className="case-honest__stage" data-reveal>
@@ -707,7 +706,7 @@ export function CasePage() {
                 <span>
                   <small>17:30</small>
                   <strong>Заказ оформлен</strong>
-                  <p>Только фактически наступивший этап</p>
+                  <p>Первый подтверждённый этап</p>
                 </span>
               </div>
               <Device
@@ -733,12 +732,12 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading case-heading--light" data-reveal>
               <span className="case-section-number">
-                09 · Отслеживание
+                09 · Заказ в пути
               </span>
-              <h2>Заказ движется — и это видно</h2>
+              <h2>Курьер в пути</h2>
               <p>
-                Завершённые этапы имеют время, активный этап выделен, а
-                будущий остаётся без выдуманного прогноза.
+                У завершённых этапов указано время. Активный отмечен как
+                «Курьер в пути», будущий ждёт подтверждения.
               </p>
             </div>
             <div className="case-tracking__stage" data-reveal>
@@ -756,29 +755,29 @@ export function CasePage() {
                 <div>
                   <Clock3 aria-hidden="true" />
                   <span>
-                    <small>Ожидаемое прибытие</small>
+                    <small>Прибытие</small>
                     <strong>12–18 минут</strong>
                   </span>
                 </div>
                 <div>
                   <Check aria-hidden="true" />
                   <span>
-                    <small>Хронология</small>
-                    <strong>Только реальные события</strong>
+                    <small>Этапы</small>
+                    <strong>Время только у наступивших</strong>
                   </span>
                 </div>
                 <div>
                   <MapPin aria-hidden="true" />
                   <span>
-                    <small>Маршрут</small>
-                    <strong>Обновлён 2 минуты назад</strong>
+                    <small>Карта</small>
+                    <strong>Обновлена 2 минуты назад</strong>
                   </span>
                 </div>
                 <PrototypeLink
                   href={demoTrackingPath}
                   className="case-button case-button--light"
                 >
-                  Посмотреть заказ в прототипе
+                  Открыть заказ в пути
                   <ExternalLink aria-hidden="true" />
                 </PrototypeLink>
               </aside>
@@ -790,12 +789,12 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading case-heading--center" data-reveal>
               <span className="case-section-number">
-                10 · Отношения после покупки
+                10 · Возвращение
               </span>
-              <h2>Не только доставка, но и возвращение</h2>
+              <h2>Вернуться к знакомому заказу</h2>
               <p>
-                История заказов, избранное и «Табрис Бонус» превращают
-                разовую доставку в продолжение отношений с брендом.
+                В профиле сохранены адрес, история заказов, избранное и
+                бонусный баланс. Прошлый заказ можно открыть снова.
               </p>
             </div>
             <div className="case-relationship__fan" data-reveal>
@@ -843,7 +842,7 @@ export function CasePage() {
               <span className="case-section-number">
                 11 · Визуальный язык
               </span>
-              <h2>Тёплый гастрономичный минимализм</h2>
+              <h2>Тёплый интерфейс</h2>
               <div className="palette">
                 <span style={{ '--swatch': '#1d3600' } as CSSProperties}>
                   Глубокий зелёный
@@ -864,8 +863,8 @@ export function CasePage() {
               </div>
               <div className="type-specimen">
                 <span>Manrope</span>
-                <strong>Еда, которую хочется выбрать</strong>
-                <p>Спокойная иерархия, мягкие тени, много воздуха.</p>
+                <strong>Паста с курицей и грибами</strong>
+                <p>Короткие подписи, мягкие тени и свободные поля.</p>
               </div>
               <div className="component-strip" aria-label="Фрагмент дизайн-системы">
                 <span className="component-strip__button">
@@ -881,9 +880,9 @@ export function CasePage() {
 
             <div className="case-system__depth" data-reveal>
               <span className="case-section-number">
-                12 · Глубина и ограничения
+                12 · Границы концепции
               </span>
-              <h2>Проработано глубоко — показано честно</h2>
+              <h2>Готовый прототип и открытые вопросы</h2>
               <div className="depth-metrics">
                 <div>
                   <strong>43</strong>
@@ -904,27 +903,27 @@ export function CasePage() {
               </div>
               <div className="case-system__columns">
                 <div>
-                  <h3>Уже реализовано</h3>
+                  <h3>В прототипе</h3>
                   <ul>
-                    <li>Полный интерактивный путь</li>
-                    <li>Корзина, избранное и несколько заказов</li>
-                    <li>Будущая дата и честные статусы</li>
-                    <li>Работа после обновления страницы</li>
+                    <li>Полный путь оформления</li>
+                    <li>Корзина, избранное и история заказов</li>
+                    <li>Доставка на будущую дату</li>
+                    <li>Статусы нового заказа и доставки</li>
                   </ul>
                 </div>
                 <div>
-                  <h3>Пока остаётся гипотезой</h3>
+                  <h3>Нужно проверить</h3>
                   <ul>
-                    <li>Реальные остатки и цены</li>
-                    <li>Backend, оплата и авторизация</li>
-                    <li>Лояльность, OMS и курьерская система</li>
-                    <li>Операционные правила доставки</li>
+                    <li>Остатки и цены</li>
+                    <li>Серверная часть, оплата и авторизация</li>
+                    <li>Интеграция с лояльностью, OMS и курьерами</li>
+                    <li>Правила доставки и замен</li>
                   </ul>
                 </div>
               </div>
               <p className="case-system__disclaimer">
-                Концепция не выдаёт продуктовые гипотезы за существующие
-                возможности «Табриса».
+                Это демонстрация продуктовой идеи, а не описание действующего
+                сервиса «Табриса».
               </p>
             </div>
           </div>
@@ -936,10 +935,10 @@ export function CasePage() {
               <span className="case-eyebrow">
                 Инициативная неофициальная концепция
               </span>
-              <h2>Попробуйте пройти путь покупателя</h2>
+              <h2>Пройдите сценарий сами</h2>
               <p>
-                Выберите еду, оформите доставку на завтра и посмотрите, как
-                сервис сопровождает заказ.
+                Выберите ужин, назначьте доставку на завтра и откройте заказ в
+                пути.
               </p>
               <div className="case-actions">
                 <PrototypeLink className="case-button case-button--light">
@@ -955,8 +954,8 @@ export function CasePage() {
                 </a>
               </div>
               <small>
-                Прототип работает локально в браузере и не отправляет заказы
-                или платёжные данные.
+                Все данные остаются в браузере. Реальные заказы и платежи не
+                отправляются.
               </small>
             </div>
             <div className="case-final__visual" data-reveal>
