@@ -33,7 +33,10 @@ export function ShopProvider({ children }: ShopProviderProps) {
     loadPersistedState,
   )
   const [isAddressOpen, setAddressOpen] = useState(
-    () => state.address === null && window.location.pathname === '/',
+    () =>
+      state.address === null &&
+      window.location.pathname === '/' &&
+      new URLSearchParams(window.location.search).get('source') !== 'case',
   )
 
   useEffect(() => {
