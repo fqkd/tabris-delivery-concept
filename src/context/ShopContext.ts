@@ -20,7 +20,9 @@ export type ShopContextValue = {
   profile: DemoProfile
   electronicReceipts: boolean
   bonusBalance: number
+  orders: OrderSnapshot[]
   lastOrder: OrderSnapshot | null
+  getOrder: (orderId: string) => OrderSnapshot | null
   setQuantity: (productId: string, quantity: number) => void
   addCartItems: (additions: CartAddition[]) => void
   removeFromCart: (productId: string) => void

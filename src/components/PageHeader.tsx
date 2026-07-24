@@ -1,5 +1,5 @@
 import { ArrowLeft, ShoppingBag } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useShop } from '../context/ShopContext'
 
 type PageHeaderProps = {
@@ -18,6 +18,7 @@ export function PageHeader({
   headingLevel = 1,
 }: PageHeaderProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { cartCount } = useShop()
 
   return (
@@ -46,7 +47,13 @@ export function PageHeader({
           type="button"
           className="icon-button icon-button--badged"
           aria-label="Открыть корзину"
-          onClick={() => navigate('/cart')}
+          onClick={() =>
+            navigate('/cart', {
+              state: {
+                from: `${location.pathname}${location.search}`,
+              },
+            })
+          }
         >
           <ShoppingBag aria-hidden="true" />
           {cartCount > 0 && <span>{cartCount > 9 ? '9+' : cartCount}</span>}

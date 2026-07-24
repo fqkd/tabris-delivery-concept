@@ -77,8 +77,6 @@ function ScrollManager() {
   const savedCatalogScroll = useRef(search.scrollTop)
   const lastKnownCatalogScroll = useRef(search.scrollTop)
   const saveCatalogScroll = useRef(setSearchScrollTop)
-  const initialPathname = useRef(location.pathname)
-  const hasLeftInitialRoute = useRef(false)
 
   savedCatalogScroll.current = search.scrollTop
   saveCatalogScroll.current = setSearchScrollTop
@@ -87,25 +85,26 @@ function ScrollManager() {
     const scroller = document.querySelector<HTMLElement>('.app-scroll')
     if (!scroller) return
 
-    if (location.pathname !== initialPathname.current) {
-      hasLeftInitialRoute.current = true
-    }
-    const appJustLoaded = !hasLeftInitialRoute.current
     const catalogRoute = location.pathname === '/catalog'
-    const restoreCatalogScroll = catalogRoute && !appJustLoaded
     scroller.scrollTo({
-      top: restoreCatalogScroll ? savedCatalogScroll.current : 0,
+      top: catalogRoute ? savedCatalogScroll.current : 0,
     })
 
     if (!catalogRoute) return
 
     lastKnownCatalogScroll.current = scroller.scrollTop
+    let saveTimer: number | undefined
     const rememberScroll = () => {
       lastKnownCatalogScroll.current = scroller.scrollTop
+      window.clearTimeout(saveTimer)
+      saveTimer = window.setTimeout(() => {
+        saveCatalogScroll.current(lastKnownCatalogScroll.current)
+      }, 150)
     }
     scroller.addEventListener('scroll', rememberScroll, { passive: true })
 
     return () => {
+      window.clearTimeout(saveTimer)
       scroller.removeEventListener('scroll', rememberScroll)
       saveCatalogScroll.current(lastKnownCatalogScroll.current)
     }

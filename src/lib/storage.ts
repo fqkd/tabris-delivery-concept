@@ -4,16 +4,16 @@ import {
   defaultProfile,
   defaultSearchState,
   isDeliveryCity,
-} from '../config/demoRules'
-import { productIds } from '../data/products'
-import { isProductCategoryId } from './catalog'
-import { normalizeQuantity } from './cart'
+} from '../config/demoRules.ts'
+import { productIds } from '../data/products.ts'
+import { isProductCategoryId } from './catalog.ts'
+import { normalizeQuantity } from './cart.ts'
 import {
   addLocalDays,
   getNearestDeliveryTimeLabel,
   isLocalDateKey,
   toLocalDateKey,
-} from './deliveryDates'
+} from './deliveryDates.ts'
 import type {
   CatalogFilters,
   CatalogSort,
@@ -23,6 +23,7 @@ import type {
   DemoProfile,
   OrderLineSnapshot,
   OrderSnapshot,
+  OrderStatusEvent,
   OrderStatus,
   OrderTotals,
   PaymentMethod,
@@ -32,7 +33,7 @@ import type {
 } from '../types'
 
 const STORAGE_KEY = 'tabris-concept-state'
-const STORAGE_VERSION = 3
+const STORAGE_VERSION = 4
 
 type UnknownRecord = Record<string, unknown>
 
@@ -66,7 +67,8 @@ export const createDefaultPersistedState = (): PersistedShopState => ({
   profile: { ...defaultProfile },
   electronicReceipts: true,
   bonusBalance: DEMO_RULES.initialBonusBalance,
-  lastOrder: null,
+  orders: [],
+  lastOrderId: null,
   pendingCartClearOrderId: null,
 })
 
@@ -261,6 +263,52 @@ const substitutionPolicies: SubstitutionPolicy[] = [
 ]
 const paymentMethods: PaymentMethod[] = ['card', 'sbp']
 
+const sanitizeOrderEvents = (
+  value: unknown,
+  createdAt: string,
+  status: OrderStatus,
+): OrderStatusEvent[] => {
+  const currentStatusIndex = orderStatuses.indexOf(status)
+  const events = Array.isArray(value)
+    ? value
+        .map((event): OrderStatusEvent | null => {
+          if (!isRecord(event)) return null
+          const eventStatus =
+            typeof event.status === 'string' &&
+            orderStatuses.includes(event.status as OrderStatus)
+              ? (event.status as OrderStatus)
+              : null
+          const occurredAt =
+            typeof event.occurredAt === 'string' &&
+            !Number.isNaN(Date.parse(event.occurredAt))
+              ? event.occurredAt
+              : null
+          if (
+            !eventStatus ||
+            !occurredAt ||
+            orderStatuses.indexOf(eventStatus) > currentStatusIndex
+          ) {
+            return null
+          }
+          return { status: eventStatus, occurredAt }
+        })
+        .filter((event): event is OrderStatusEvent => Boolean(event))
+    : []
+
+  const uniqueEvents = [...new Map(
+    events.map((event) => [event.status, event]),
+  ).values()].sort(
+    (left, right) =>
+      Date.parse(left.occurredAt) - Date.parse(right.occurredAt),
+  )
+
+  if (!uniqueEvents.some((event) => event.status === 'placed')) {
+    uniqueEvents.unshift({ status: 'placed', occurredAt: createdAt })
+  }
+
+  return uniqueEvents
+}
+
 const sanitizeOrder = (value: unknown): OrderSnapshot | null => {
   if (!isRecord(value) || !Array.isArray(value.lines)) return null
   const createdAt =
@@ -281,7 +329,7 @@ const sanitizeOrder = (value: unknown): OrderSnapshot | null => {
     typeof value.status === 'string' &&
     orderStatuses.includes(value.status as OrderStatus)
       ? (value.status as OrderStatus)
-      : 'assembling'
+      : 'placed'
   const substitutionPolicy =
     typeof value.substitutionPolicy === 'string' &&
     substitutionPolicies.includes(value.substitutionPolicy as SubstitutionPolicy)
@@ -310,6 +358,21 @@ const sanitizeOrder = (value: unknown): OrderSnapshot | null => {
     id: value.id.slice(0, 50),
     createdAt,
     status,
+    statusEvents: sanitizeOrderEvents(value.statusEvents, createdAt, status),
+    ...(isRecord(value.eta)
+      ? {
+          eta: {
+            minMinutes: safeNumber(value.eta.minMinutes, 0, 0, 240),
+            maxMinutes: safeNumber(value.eta.maxMinutes, 0, 0, 240),
+          },
+        }
+      : {}),
+    ...(typeof value.courierLocationUpdatedAt === 'string' &&
+    !Number.isNaN(Date.parse(value.courierLocationUpdatedAt))
+      ? {
+          courierLocationUpdatedAt: value.courierLocationUpdatedAt,
+        }
+      : {}),
     address,
     deliverySlot,
     recipient: sanitizeProfile(value.recipient),
@@ -339,12 +402,48 @@ const sanitizePersistedState = (value: unknown): PersistedShopState => {
       )]
     : []
 
-  const lastOrder = sanitizeOrder(value.lastOrder)
+  const legacyOrder = sanitizeOrder(value.lastOrder)
+  const legacyOrderNeedsPlacedStatus =
+    legacyOrder &&
+    isRecord(value.lastOrder) &&
+    !Array.isArray(value.lastOrder.statusEvents)
+  const migratedLegacyOrder = legacyOrderNeedsPlacedStatus
+    ? {
+        ...legacyOrder,
+        status: 'placed' as const,
+        statusEvents: [
+          {
+            status: 'placed' as const,
+            occurredAt: legacyOrder.createdAt,
+          },
+        ],
+      }
+    : legacyOrder
+  const rawOrders = Array.isArray(value.orders)
+    ? value.orders
+    : migratedLegacyOrder
+      ? [migratedLegacyOrder]
+      : []
+  const orders = [...new Map(
+    rawOrders
+      .map(sanitizeOrder)
+      .filter((order): order is OrderSnapshot => Boolean(order))
+      .map((order) => [order.id, order]),
+  ).values()]
+    .sort(
+      (left, right) =>
+        Date.parse(right.createdAt) - Date.parse(left.createdAt),
+    )
+    .slice(0, 20)
+  const lastOrderId =
+    typeof value.lastOrderId === 'string' &&
+    orders.some((order) => order.id === value.lastOrderId)
+      ? value.lastOrderId
+      : orders[0]?.id ?? null
   const pendingCartClearOrderId =
-    lastOrder &&
     typeof value.pendingCartClearOrderId === 'string' &&
-    value.pendingCartClearOrderId === lastOrder.id
-      ? lastOrder.id
+    orders.some((order) => order.id === value.pendingCartClearOrderId)
+      ? value.pendingCartClearOrderId
       : null
 
   return {
@@ -358,7 +457,8 @@ const sanitizePersistedState = (value: unknown): PersistedShopState => {
       value.bonusBalance,
       DEMO_RULES.initialBonusBalance,
     ),
-    lastOrder,
+    orders,
+    lastOrderId,
     pendingCartClearOrderId,
   }
 }
@@ -396,6 +496,9 @@ export const loadPersistedState = (): PersistedShopState => {
     const parsed = parseJson(localStorage.getItem(STORAGE_KEY))
     if (isRecord(parsed)) {
       if (parsed.version === STORAGE_VERSION) {
+        return sanitizePersistedState(parsed.data)
+      }
+      if (parsed.version === 3 && isRecord(parsed.data)) {
         return sanitizePersistedState(parsed.data)
       }
       if (parsed.version === 2 && isRecord(parsed.data)) {

@@ -1,38 +1,95 @@
 import {
   Bike,
   Check,
+  CheckCircle2,
   ChevronDown,
   Clock3,
   CreditCard,
   Home,
   MapPin,
   Navigation,
+  PackageCheck,
   PackageOpen,
   ShoppingBag,
   Smartphone,
 } from 'lucide-react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { useShop } from '../context/ShopContext'
 import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice, formatProductCount } from '../lib/format'
 import { buildTrackingTimeline } from '../lib/order'
-import type { PaymentMethod } from '../types'
+import type { OrderStatus, PaymentMethod } from '../types'
 
 const paymentLabels: Record<PaymentMethod, string> = {
   card: 'Банковская карта',
   sbp: 'СБП',
 }
 
+const statusPresentation: Record<
+  OrderStatus,
+  {
+    eyebrow: string
+    title: string
+    description: string
+    icon: typeof Bike
+  }
+> = {
+  placed: {
+    eyebrow: 'Заказ оформлен',
+    title: 'Заказ принят',
+    description: 'Мы получили заказ и скоро начнём его сборку.',
+    icon: CheckCircle2,
+  },
+  assembling: {
+    eyebrow: 'Собираем заказ',
+    title: 'Подбираем ваши товары',
+    description: 'Сотрудники магазина собирают и бережно упаковывают заказ.',
+    icon: PackageOpen,
+  },
+  courier: {
+    eyebrow: 'Передали курьеру',
+    title: 'Заказ у курьера',
+    description: 'Курьер получил заказ и готовится начать доставку.',
+    icon: PackageCheck,
+  },
+  delivering: {
+    eyebrow: 'Заказ в пути',
+    title: 'Курьер едет к вам',
+    description: 'Заказ уже покинул магазин и движется к адресу доставки.',
+    icon: Bike,
+  },
+  delivered: {
+    eyebrow: 'Заказ доставлен',
+    title: 'Спасибо за заказ',
+    description: 'Заказ передан получателю.',
+    icon: CheckCircle2,
+  },
+}
+
+const formatLocationUpdate = (occurredAt: string | undefined) => {
+  if (!occurredAt) return 'Позиция обновлена недавно'
+  const minutes = Math.max(
+    0,
+    Math.round((Date.now() - Date.parse(occurredAt)) / 60_000),
+  )
+  if (minutes === 0) return 'Позиция обновлена только что'
+  if (minutes === 1) return 'Позиция обновлена минуту назад'
+  if (minutes >= 2 && minutes <= 4) {
+    return `Позиция обновлена ${minutes} минуты назад`
+  }
+  return `Позиция обновлена ${minutes} минут назад`
+}
+
 export function TrackingPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { orderId } = useParams()
-  const { lastOrder } = useShop()
+  const { getOrder } = useShop()
+  const order = orderId ? getOrder(decodeURIComponent(orderId)) : null
+  const sourcePath = (location.state as { from?: string } | null)?.from
 
-  if (
-    !lastOrder ||
-    (orderId && decodeURIComponent(orderId) !== lastOrder.id)
-  ) {
+  if (!order) {
     return (
       <main className="screen screen--order-state">
         <PageHeader
@@ -60,34 +117,38 @@ export function TrackingPage() {
     )
   }
 
-  const order = lastOrder
   const deliveryDate = formatSavedDeliveryDate(order.deliverySlot)
-  const timeline = buildTrackingTimeline({
-    ...order,
-    status: 'delivering',
-  })
+  const timeline = buildTrackingTimeline(order)
+  const presentation = statusPresentation[order.status]
+  const StatusIcon = presentation.icon
+  const showCourierRoute = order.status === 'delivering' && Boolean(order.eta)
   const PaymentIcon = order.paymentMethod === 'card' ? CreditCard : Smartphone
 
   return (
     <main className="screen screen--tracking">
       <PageHeader
         title={`Заказ № ${order.id}`}
-        backTo="/profile"
+        onBack={() => {
+          if (sourcePath) navigate(-1)
+          else navigate('/profile')
+        }}
         showCart={false}
         headingLevel="none"
       />
 
       <section className="tracking-status" aria-labelledby="tracking-status-title">
         <span className="tracking-status__icon">
-          <Bike aria-hidden="true" />
+          <StatusIcon aria-hidden="true" />
         </span>
-        <span className="tracking-status__eyebrow">Заказ в пути</span>
-        <h1 id="tracking-status-title">Курьер едет к вам</h1>
-        <p>Заказ уже покинул магазин и движется к адресу доставки.</p>
+        <span className="tracking-status__eyebrow">
+          {presentation.eyebrow}
+        </span>
+        <h1 id="tracking-status-title">{presentation.title}</h1>
+        <p>{presentation.description}</p>
         <div className="tracking-status__eta">
           <Clock3 aria-hidden="true" />
           <span>
-            <small>Ожидаемая доставка</small>
+            <small>Интервал доставки</small>
             <strong>
               {deliveryDate.dayLabel}, {deliveryDate.dateLabel}
             </strong>
@@ -116,36 +177,38 @@ export function TrackingPage() {
         </ol>
       </section>
 
-      <section className="tracking-route" aria-labelledby="route-title">
-        <div className="tracking-route__heading">
-          <div>
-            <span>Демо-маршрут</span>
-            <h2 id="route-title">Маршрут доставки</h2>
-            <p>Позиция обновлена 2 минуты назад</p>
+      {showCourierRoute && order.eta && (
+        <section className="tracking-route" aria-labelledby="route-title">
+          <div className="tracking-route__heading">
+            <div>
+              <span>Демо-маршрут</span>
+              <h2 id="route-title">Маршрут доставки</h2>
+              <p>{formatLocationUpdate(order.courierLocationUpdatedAt)}</p>
+            </div>
+            <Navigation aria-hidden="true" />
           </div>
-          <Navigation aria-hidden="true" />
-        </div>
-        <div className="tracking-map-card">
-          <img
-            src="/images/maps/courier-delivery-route.png"
-            alt="Демонстрационная карта маршрута курьера от магазина к адресу доставки"
-            width="1536"
-            height="1024"
-            decoding="async"
-          />
-          <span className="tracking-map-card__eta">
-            Будет через 12–18 минут
-          </span>
-        </div>
-        <div className="tracking-address">
-          <MapPin aria-hidden="true" />
-          <span>
-            <small>Адрес доставки</small>
-            <strong>{order.address.street}</strong>
-            <span>{order.address.city}</span>
-          </span>
-        </div>
-      </section>
+          <div className="tracking-map-card">
+            <img
+              src="/images/maps/courier-delivery-route.png"
+              alt="Демонстрационная карта маршрута курьера от магазина к адресу доставки"
+              width="1536"
+              height="1024"
+              decoding="async"
+            />
+            <span className="tracking-map-card__eta">
+              Будет через {order.eta.minMinutes}–{order.eta.maxMinutes} минут
+            </span>
+          </div>
+          <div className="tracking-address">
+            <MapPin aria-hidden="true" />
+            <span>
+              <small>Адрес доставки</small>
+              <strong>{order.address.street}</strong>
+              <span>{order.address.city}</span>
+            </span>
+          </div>
+        </section>
+      )}
 
       <details className="tracking-composition">
         <summary>

@@ -1,6 +1,6 @@
 import { Gift, MapPin, ShoppingBag, Trash2, Truck } from 'lucide-react'
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { AppPortal } from '../components/AppPortal'
 import { PageHeader } from '../components/PageHeader'
 import { QuantityControl } from '../components/QuantityControl'
@@ -10,7 +10,9 @@ import { calculateOrderTotals, getCartItems } from '../lib/cart'
 import { formatPrice, formatProductCount } from '../lib/format'
 
 export function CartPage() {
+  const location = useLocation()
   const navigate = useNavigate()
+  const sourcePath = (location.state as { from?: string } | null)?.from
   const {
     address,
     bonusBalance,
@@ -29,7 +31,11 @@ export function CartPage() {
       <MapPin aria-hidden="true" />
       <span>
         <small>Адрес доставки</small>
-        <strong>{address?.street ?? 'Выберите адрес'}</strong>
+        <strong>
+          {address
+            ? `${address.city} · ${address.street}`
+            : 'Выберите адрес'}
+        </strong>
       </span>
       <span>{address ? 'Изменить' : 'Выбрать'}</span>
     </button>
@@ -38,7 +44,14 @@ export function CartPage() {
   if (cartItems.length === 0) {
     return (
       <main className="screen screen--cart has-bottom-nav">
-        <PageHeader title="Корзина" showCart={false} backTo="/" />
+        <PageHeader
+          title="Корзина"
+          showCart={false}
+          onBack={() => {
+            if (sourcePath) navigate(-1)
+            else navigate('/')
+          }}
+        />
         {addressControl}
         <div className="empty-cart">
           <span>
@@ -69,7 +82,14 @@ export function CartPage() {
 
   return (
     <main className="screen screen--cart has-bottom-nav has-cart-checkout">
-      <PageHeader title="Корзина" showCart={false} backTo="/" />
+      <PageHeader
+        title="Корзина"
+        showCart={false}
+        onBack={() => {
+          if (sourcePath) navigate(-1)
+          else navigate('/')
+        }}
+      />
       {addressControl}
 
       <section className="cart-items" aria-label="Товары в корзине">

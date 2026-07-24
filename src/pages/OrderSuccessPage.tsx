@@ -6,7 +6,6 @@ import {
   Home,
   MapPin,
   PackageOpen,
-  Route,
   Smartphone,
 } from 'lucide-react'
 import { useEffect } from 'react'
@@ -30,11 +29,8 @@ const PaymentIcon = ({ method }: { method: PaymentMethod }) => {
 export function OrderSuccessPage() {
   const navigate = useNavigate()
   const { orderId } = useParams()
-  const { clearOrderedCart, lastOrder } = useShop()
-  const matchedOrder =
-    lastOrder && (!orderId || decodeURIComponent(orderId) === lastOrder.id)
-      ? lastOrder
-      : null
+  const { clearOrderedCart, getOrder } = useShop()
+  const matchedOrder = orderId ? getOrder(decodeURIComponent(orderId)) : null
 
   useEffect(() => {
     if (matchedOrder) clearOrderedCart(matchedOrder.id)
@@ -85,10 +81,10 @@ export function OrderSuccessPage() {
           <CheckCircle2 aria-hidden="true" />
         </span>
         <span className="success-hero__eyebrow">Всё получилось</span>
-        <h1 id="success-title">Начинаем собирать ваш заказ</h1>
+        <h1 id="success-title">Заказ принят</h1>
         <p>
-          Никакие данные и платёжные запросы не отправлены — это локальный
-          демонстрационный заказ.
+          Мы получили заказ и скоро начнём сборку. Никакие данные и платёжные
+          запросы не отправлены — это локальная демонстрация.
         </p>
         <span className="success-hero__number">№ {order.id}</span>
       </section>
@@ -167,11 +163,15 @@ export function OrderSuccessPage() {
           type="button"
           className="primary-button primary-button--wide"
           onClick={() =>
-            navigate(`/orders/${encodeURIComponent(order.id)}/tracking`)
+            navigate(`/orders/${encodeURIComponent(order.id)}/tracking`, {
+              state: {
+                from: `/orders/${encodeURIComponent(order.id)}/success`,
+              },
+            })
           }
         >
-          <Route aria-hidden="true" />
-          Отслеживать заказ
+          <PackageOpen aria-hidden="true" />
+          Открыть заказ
         </button>
         <button
           type="button"

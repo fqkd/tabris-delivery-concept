@@ -5,7 +5,14 @@ import {
   Navigation,
   X,
 } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   deliveryCities,
   isDeliveryCity,
@@ -18,6 +25,8 @@ const getInitialCity = (city: string | undefined): DeliveryCity =>
   isDeliveryCity(city) ? city : deliveryCities[0]
 
 export function AddressSheet() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const {
     address,
     isAddressOpen,
@@ -31,7 +40,70 @@ export function AddressSheet() {
   const dialogRef = useRef<HTMLElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
+  const modalHistoryRef = useRef(false)
+  const pendingModalHistoryRef = useRef(false)
   const nearestDeliveryTime = getNearestDeliveryTimeLabel()
+  const locationState = useMemo(
+    () =>
+      typeof location.state === 'object' && location.state !== null
+        ? (location.state as Record<string, unknown>)
+        : {},
+    [location.state],
+  )
+  const hasModalHistory = locationState.addressSheet === true
+  const currentRoute = `${location.pathname}${location.search}${location.hash}`
+
+  const closeSheet = useCallback(() => {
+    closeAddress()
+    if (hasModalHistory) navigate(-1)
+  }, [closeAddress, hasModalHistory, navigate])
+
+  const confirmSheetAddress = useCallback(
+    (nextAddress: Parameters<typeof confirmAddress>[0]) => {
+      confirmAddress(nextAddress)
+      if (hasModalHistory) navigate(-1)
+    },
+    [confirmAddress, hasModalHistory, navigate],
+  )
+
+  useEffect(() => {
+    if (!isAddressOpen) {
+      modalHistoryRef.current = false
+      pendingModalHistoryRef.current = false
+      return
+    }
+
+    if (hasModalHistory) {
+      pendingModalHistoryRef.current = false
+      modalHistoryRef.current = true
+      return
+    }
+
+    if (pendingModalHistoryRef.current) return
+
+    if (!modalHistoryRef.current) {
+      pendingModalHistoryRef.current = true
+      navigate(currentRoute, {
+        state: {
+          ...locationState,
+          addressSheet: true,
+        },
+      })
+      return
+    }
+
+    if (modalHistoryRef.current && !hasModalHistory) {
+      modalHistoryRef.current = false
+      closeAddress()
+    }
+  }, [
+    closeAddress,
+    currentRoute,
+    hasModalHistory,
+    isAddressOpen,
+    locationState,
+    navigate,
+  ])
 
   useEffect(() => {
     if (isAddressOpen) {
@@ -48,7 +120,7 @@ export function AddressSheet() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault()
-        closeAddress()
+        closeSheet()
         return
       }
 
@@ -75,7 +147,7 @@ export function AddressSheet() {
       document.removeEventListener('keydown', handleKeyDown)
       window.requestAnimationFrame(() => previousFocusRef.current?.focus())
     }
-  }, [closeAddress, isAddressOpen])
+  }, [closeSheet, isAddressOpen])
 
   if (!isAddressOpen) return null
 
@@ -84,7 +156,7 @@ export function AddressSheet() {
     const confirmedStreet = street.trim()
     if (!confirmedStreet) return
 
-    confirmAddress({
+    confirmSheetAddress({
       city: nextCity,
       street: confirmedStreet,
       deliveryTime: nearestDeliveryTime,
@@ -97,7 +169,7 @@ export function AddressSheet() {
         type="button"
         className="sheet-overlay__backdrop"
         aria-label="Закрыть выбор адреса"
-        onClick={closeAddress}
+        onClick={closeSheet}
       />
       <section
         ref={dialogRef}
@@ -116,7 +188,7 @@ export function AddressSheet() {
             type="button"
             className="icon-button"
             aria-label="Закрыть"
-            onClick={closeAddress}
+            onClick={closeSheet}
           >
             <X aria-hidden="true" />
           </button>
@@ -185,7 +257,7 @@ export function AddressSheet() {
           className="primary-button primary-button--wide"
           disabled={!street.trim()}
           onClick={() =>
-            confirmAddress({
+            confirmSheetAddress({
               city,
               street: street.trim(),
               deliveryTime: nearestDeliveryTime,
