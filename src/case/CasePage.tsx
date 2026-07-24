@@ -88,10 +88,20 @@ function PrototypeLink({
   )
 }
 
-const SearchSequence = ({ active }: { active: boolean }) => {
+const SearchSequence = ({
+  active,
+  reducedMotion,
+}: {
+  active: boolean
+  reducedMotion: boolean
+}) => {
   const [frame, setFrame] = useState(0)
 
   useEffect(() => {
+    if (reducedMotion) {
+      setFrame(searchFrames.length - 1)
+      return
+    }
     if (!active || frame > 0) return
     let current = 0
     const timer = window.setInterval(() => {
@@ -100,7 +110,7 @@ const SearchSequence = ({ active }: { active: boolean }) => {
       if (current >= searchFrames.length - 1) window.clearInterval(timer)
     }, 260)
     return () => window.clearInterval(timer)
-  }, [active, frame])
+  }, [active, frame, reducedMotion])
 
   return (
     <div className="search-sequence" aria-label="Поиск по запросу «стейк»">
@@ -119,10 +129,16 @@ export function CasePage() {
   const [scrolled, setScrolled] = useState(false)
   const [catalogActive, setCatalogActive] = useState(false)
   const [checkoutActive, setCheckoutActive] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
   const catalogRef = useRef<HTMLElement>(null)
   const checkoutRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onMotionChange = () => setReducedMotion(motionQuery.matches)
+    onMotionChange()
+    motionQuery.addEventListener('change', onMotionChange)
+
     const onScroll = () => setScrolled(window.scrollY > 360)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -159,6 +175,7 @@ export function CasePage() {
 
     return () => {
       window.removeEventListener('scroll', onScroll)
+      motionQuery.removeEventListener('change', onMotionChange)
       revealObserver.disconnect()
       featureObserver.disconnect()
     }
@@ -503,7 +520,10 @@ export function CasePage() {
                 src={`${screenshots}/catalog-search.webp`}
                 alt="Поиск и результаты"
               />
-              <SearchSequence active={catalogActive} />
+              <SearchSequence
+                active={catalogActive}
+                reducedMotion={reducedMotion}
+              />
               <div className="case-catalog__facts">
                 <span>
                   <Leaf aria-hidden="true" />
@@ -848,7 +868,9 @@ export function CasePage() {
                 <p>Спокойная иерархия, мягкие тени, много воздуха.</p>
               </div>
               <div className="component-strip" aria-label="Фрагмент дизайн-системы">
-                <button type="button">Основное действие</button>
+                <span className="component-strip__button">
+                  Основное действие
+                </span>
                 <span>
                   <Leaf aria-hidden="true" />
                   Наше производство
