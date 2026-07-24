@@ -149,7 +149,7 @@ export function AddressSheet() {
     }
   }, [closeSheet, isAddressOpen])
 
-  if (!isAddressOpen) return null
+  if (!isAddressOpen || !hasModalHistory) return null
 
   const chooseCity = (nextCity: DeliveryCity) => {
     setCity(nextCity)
