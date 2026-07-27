@@ -450,10 +450,10 @@ img {
 .case-device__speaker {
   position: absolute;
   z-index: 4;
-  top: 8px;
+  top: calc(var(--device-width) * 0.025);
   left: 50%;
   width: 33%;
-  height: 21px;
+  height: calc(var(--device-width) * 0.066);
   border-radius: 999px;
   background: #182016;
   transform: translateX(-50%);
@@ -2339,11 +2339,6 @@ img {
     border-width: 5px;
     opacity: 0.92;
     transform: rotate(5deg);
-  }
-
-  .case-device__speaker {
-    top: 6px;
-    height: 16px;
   }
 
   .food-object--salad {

@@ -22,6 +22,7 @@
   --nav-height: 74px;
   --control-height: 44px;
   --mobile-width: 430px;
+  --app-safe-top: max(48px, env(safe-area-inset-top, 0px));
 }
 
 button {
@@ -67,6 +68,7 @@ a {
   width: 100%;
   max-width: var(--mobile-width);
   height: 100dvh;
+  padding-top: var(--app-safe-top);
   overflow: hidden;
   background: var(--milk);
   color: var(--graphite);
