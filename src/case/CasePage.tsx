@@ -324,9 +324,11 @@ export function CasePage() {
             </div>
             <div className="principle-list">
               <article className="principle principle--inspire" data-reveal>
-                <div className="principle__index">01</div>
                 <div className="principle__copy">
-                  <Sparkles aria-hidden="true" />
+                  <div className="principle__lead">
+                    <span className="principle__index">01</span>
+                    <Sparkles aria-hidden="true" />
+                  </div>
                   <h3>Подсказать ужин</h3>
                   <p>Подборки помогают решить, что приготовить.</p>
                 </div>

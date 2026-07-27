@@ -705,6 +705,22 @@ img {
   color: var(--case-green-700);
 }
 
+.principle__lead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.principle__lead .principle__index {
+  padding: 0;
+}
+
+.principle__lead svg {
+  width: 28px;
+  height: 28px;
+  color: var(--case-green-700);
+}
+
 .principle__copy h3 {
   margin: 14px 0 8px;
   color: var(--case-green-950);
@@ -749,12 +765,21 @@ img {
 .principle--inspire {
   min-height: 700px;
   grid-row: 1 / span 2;
-  grid-template-columns: 72px minmax(0, 1fr) minmax(230px, 0.9fr);
+  grid-template-columns: minmax(245px, 0.75fr) minmax(330px, 1.25fr);
 }
 
 .principle--inspire .principle__copy {
-  align-self: start;
-  padding-top: 84px;
+  align-self: center;
+  padding: 48px 24px 48px 32px;
+}
+
+.principle--inspire .principle__screen {
+  position: relative;
+}
+
+.principle--inspire .principle__screen img {
+  position: absolute;
+  inset: 0;
 }
 
 .case-dinner {
@@ -1922,7 +1947,11 @@ img {
 
   .principle--inspire .principle__copy {
     align-self: center;
-    padding-top: 42px;
+    padding: 32px 34px;
+  }
+
+  .principle--inspire {
+    grid-template-columns: minmax(260px, 0.68fr) minmax(420px, 1.32fr);
   }
 
   .case-dinner__plate {
@@ -2443,7 +2472,20 @@ img {
 
   .principle--inspire .principle__copy {
     align-self: auto;
-    padding: 36px 22px 170px 10px;
+    padding: 34px 22px 214px;
+  }
+
+  .principle--inspire {
+    min-height: 380px;
+    grid-template-columns: 1fr;
+  }
+
+  .principle--inspire .principle__screen {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 190px;
   }
 
   .case-dinner__table {
