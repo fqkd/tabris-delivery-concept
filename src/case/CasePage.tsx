@@ -196,7 +196,6 @@ export function CasePage() {
           />
           <span>Табрис Доставка</span>
         </a>
-        <span className="case-nav__note">Неофициальный прототип</span>
         <PrototypeLink className="case-nav__prototype">
           Прототип
           <ExternalLink aria-hidden="true" />
@@ -211,7 +210,7 @@ export function CasePage() {
               <span className="case-eyebrow">
                 Неофициальная инициативная концепция
               </span>
-              <h1>Концепция мобильной доставки</h1>
+              <h1>Концепция приложения доставки</h1>
               <p>
                 Интерактивный прототип: от готового ужина и каталога до
                 оформления, статуса и истории заказа.
@@ -326,7 +325,7 @@ export function CasePage() {
               <span className="case-section-number">
                 02 · Что можно сделать
               </span>
-              <h2>Собрать, найти, проверить</h2>
+              <h2>Выбрать ужин, найти товар, отследить заказ</h2>
             </div>
             <div className="principle-list">
               <article className="principle principle--inspire" data-reveal>
@@ -400,7 +399,7 @@ export function CasePage() {
               <span className="case-section-number">
                 03 · Готовый набор
               </span>
-              <h2>Ужин можно подстроить</h2>
+              <h2>Состав ужина можно изменить</h2>
               <p>
                 В наборе видны блюда, количество и общая сумма. Любую позицию
                 можно убрать — цена пересчитается, а оставшееся добавится в
@@ -504,7 +503,7 @@ export function CasePage() {
               <p>
                 Можно открыть полный список категорий или ввести запрос. В
                 карточке салата указаны вес, состав, цена со скидкой, срок
-                годности и сумма будущего начисления.
+                годности и сколько бонусов начислится за покупку.
               </p>
             </div>
             <div className="case-catalog__stage" data-reveal>
@@ -545,24 +544,21 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading" data-reveal>
               <span className="case-section-number">
-                06 · От корзины до доставки
+                06 · Путь заказа
               </span>
-              <h2>Выбор превращается в заказ</h2>
+              <h2>От корзины до доставки</h2>
               <p>
-                Для примера собран заказ на 1 335 ₽ в Краснодаре: четыре товара
-                и доставка завтра, 10:00–12:00. После оформления адрес, интервал
-                и сумма остаются в подтверждении и отслеживании.
+                Основной заказ: четыре товара на 1 335 ₽, доставка в Краснодаре
+                завтра, 10:00–12:00. После оформления он остаётся в статусе
+                «Заказ оформлен»; карта относится к отдельному демо-заказу.
               </p>
             </div>
             <ol className="journey-path" data-reveal>
               {[
-                [MapPin, 'Адрес', 'Краснодар'],
-                [Search, 'Поиск', 'Товары найдены'],
-                [Leaf, 'Товар', 'Состав и цена'],
-                [ShoppingBag, 'Корзина', '4 товара'],
-                [Clock3, 'Интервал', 'Завтра, 10–12'],
-                [PackageCheck, 'Заказ', 'Принят'],
-                [Truck, 'Доставка', 'Курьер в пути'],
+                [ShoppingBag, 'Корзина', '4 товара · 1 335 ₽'],
+                [Clock3, 'Оформление', 'Завтра · 10:00–12:00'],
+                [PackageCheck, 'Заказ оформлен', 'Основной заказ'],
+                [Truck, 'Демо-заказ в пути', 'Отдельный пример'],
               ].map(([Icon, title, detail], index) => {
                 const StepIcon = Icon as typeof MapPin
                 return (
@@ -579,29 +575,29 @@ export function CasePage() {
             </ol>
             <div className="journey-screens" data-reveal>
               <img
-                src={`${screenshots}/address.webp`}
-                alt="Выбор города и адреса"
-                width="390"
-                height="844"
-                loading="lazy"
-              />
-              <img
-                src={`${screenshots}/product-salad.webp`}
-                alt="Выбор товара"
+                src={`${screenshots}/cart.webp`}
+                alt="Корзина основного заказа"
                 width="390"
                 height="844"
                 loading="lazy"
               />
               <img
                 src={`${screenshots}/checkout-selected.webp`}
-                alt="Выбор доставки"
+                alt="Оформление основного заказа"
+                width="390"
+                height="844"
+                loading="lazy"
+              />
+              <img
+                src={`${screenshots}/new-order.webp`}
+                alt="Основной заказ со статусом «Заказ оформлен»"
                 width="390"
                 height="844"
                 loading="lazy"
               />
               <img
                 src={`${screenshots}/tracking-map.webp`}
-                alt="Отслеживание заказа"
+                alt="Отдельный демо-заказ с картой"
                 width="390"
                 height="844"
                 loading="lazy"
@@ -689,13 +685,13 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading case-heading--center" data-reveal>
               <span className="case-section-number">
-                08 · Сразу после оформления
+                08 · Основной заказ
               </span>
-              <h2>Заказ принят, карты пока нет</h2>
+              <h2>Сразу после оформления</h2>
               <p>
-                Новый заказ сохраняется со статусом «Заказ оформлен». На этом
-                экране нет маршрута и времени прибытия; ниже показан отдельный
-                демо-заказ, который уже передали курьеру.
+                Основной заказ сохраняется в браузере со статусом «Заказ
+                оформлен». Он не переходит к курьеру: карта и движение показаны
+                ниже на отдельном демо-заказе.
               </p>
             </div>
             <div className="case-honest__stage" data-reveal>
@@ -709,7 +705,7 @@ export function CasePage() {
                   <Check aria-hidden="true" />
                 </span>
                 <span>
-                  <small>17:30</small>
+                  <small>Основной заказ</small>
                   <strong>Заказ оформлен</strong>
                   <p>Карта и время прибытия не показываются</p>
                 </span>
@@ -737,13 +733,13 @@ export function CasePage() {
           <div className="case-container">
             <div className="case-heading case-heading--light" data-reveal>
               <span className="case-section-number">
-                09 · Заказ в пути
+                09 · Отдельный демо-заказ
               </span>
-              <h2>Что видно, когда курьер выехал</h2>
+              <h2>Курьер уже в пути</h2>
               <p>
-                В демо-заказе в пути есть время завершённых этапов, текущий
-                статус, карта и ожидаемое время. Будущий этап доставки остаётся
-                без времени.
+                В подготовленном демо-заказе видны текущий статус, карта и
+                ожидаемое время. У ещё не начавшихся этапов время не
+                показывается.
               </p>
             </div>
             <div className="case-tracking__stage" data-reveal>
@@ -769,7 +765,7 @@ export function CasePage() {
                   <Check aria-hidden="true" />
                   <span>
                     <small>Этапы</small>
-                    <strong>Время только у наступивших</strong>
+                    <strong>Время начала каждого этапа</strong>
                   </span>
                 </div>
                 <div>
@@ -779,6 +775,10 @@ export function CasePage() {
                     <strong>Обновлена 2 минуты назад</strong>
                   </span>
                 </div>
+                <p className="tracking-facts__note">
+                  Карта и движение курьера показаны на подготовленном
+                  демо-заказе.
+                </p>
                 <PrototypeLink
                   href={demoTrackingPath}
                   className="case-button case-button--light"
@@ -944,19 +944,26 @@ export function CasePage() {
               <span className="case-eyebrow">
                 От выбора до истории заказа
               </span>
-              <h2>Пройдите весь путь</h2>
+              <h2>Попробуйте прототип</h2>
               <p>
-                Выберите набор или отдельные товары, назначьте время доставки,
-                оформите демо-заказ и откройте его из истории в профиле.
+                Соберите заказ и откройте его в профиле. Отдельный демо-заказ
+                показывает карту и движение курьера.
               </p>
               <div className="case-actions">
                 <PrototypeLink className="case-button case-button--light">
                   Открыть прототип
                   <ExternalLink aria-hidden="true" />
                 </PrototypeLink>
+                <PrototypeLink
+                  href={demoTrackingPath}
+                  className="case-button case-button--light"
+                >
+                  Посмотреть заказ в пути
+                  <Truck aria-hidden="true" />
+                </PrototypeLink>
                 <a
                   className="case-button case-button--ghost"
-                  href="mailto:?subject=%D0%A2%D0%B0%D0%B1%D1%80%D0%B8%D1%81%20%D0%94%D0%BE%D1%81%D1%82%D0%B0%D0%B2%D0%BA%D0%B0%20%E2%80%94%20%D0%BE%D0%B1%D1%81%D1%83%D0%B6%D0%B4%D0%B5%D0%BD%D0%B8%D0%B5%20%D0%BA%D0%BE%D0%BD%D1%86%D0%B5%D0%BF%D1%86%D0%B8%D0%B8"
+                  href="mailto:hello@eh.works"
                 >
                   Обсудить концепцию
                   <ArrowRight aria-hidden="true" />

@@ -82,10 +82,10 @@ export function OrderSuccessPage() {
           <CheckCircle2 aria-hidden="true" />
         </span>
         <span className="success-hero__eyebrow">Всё получилось</span>
-        <h1 id="success-title">Заказ принят</h1>
+        <h1 id="success-title">Заказ оформлен</h1>
         <p>
-          Мы получили заказ и скоро начнём сборку. Никакие данные и платёжные
-          запросы не отправлены — это локальная демонстрация.
+          Заказ сохранён в браузере. Дальнейшие статусы в нём не меняются — это
+          локальная демонстрация.
         </p>
         <span className="success-hero__number">№ {order.id}</span>
       </section>

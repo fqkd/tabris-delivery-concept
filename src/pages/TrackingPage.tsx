@@ -37,9 +37,10 @@ const statusPresentation: Record<
   }
 > = {
   placed: {
-    eyebrow: 'Заказ оформлен',
-    title: 'Заказ принят',
-    description: 'Мы получили заказ и скоро начнём его сборку.',
+    eyebrow: 'Текущий статус',
+    title: 'Заказ оформлен',
+    description:
+      'Заказ сохранён в браузере. Дальнейшие статусы в нём не меняются.',
     icon: CheckCircle2,
   },
   assembling: {

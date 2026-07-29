@@ -129,7 +129,7 @@ export const buildTrackingTimeline = (order: OrderSnapshot): TrackingStep[] => {
     {
       id: 'placed',
       label: orderStatusLabels.placed,
-      description: 'Мы получили заказ и проверили данные',
+      description: 'Данные заказа сохранены в браузере',
     },
     {
       id: 'assembling',
