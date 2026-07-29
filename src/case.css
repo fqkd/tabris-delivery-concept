@@ -625,41 +625,62 @@ img {
 
 .case-idea__visual {
   position: relative;
-  min-height: 700px;
+  min-height: 780px;
+  isolation: isolate;
 }
 
 .case-idea__visual .case-device {
   position: absolute;
+  z-index: 3;
   top: 0;
-  left: 36px;
-  --device-width: 315px;
-  transform: rotate(3deg);
+  left: 50%;
+  --device-width: 322px;
+  transform: translateX(-56%) rotate(-1deg);
 }
 
 .case-idea__dish {
   position: absolute;
+  z-index: 1;
+  top: 190px;
   right: -8px;
-  bottom: 36px;
-  width: 230px;
+  box-sizing: border-box;
+  width: 148px;
+  height: 148px;
   overflow: hidden;
-  border-radius: 26px;
+  border: 8px solid rgba(255, 255, 255, 0.86);
+  border-radius: 50%;
   background: var(--case-white);
-  box-shadow: 0 26px 64px rgba(29, 54, 0, 0.16);
+  box-shadow: 0 22px 56px rgba(29, 54, 0, 0.14);
+  opacity: 0.94;
+  pointer-events: none;
+  transform: rotate(7deg);
 }
 
 .case-idea__dish img {
   width: 100%;
-  aspect-ratio: 1;
+  height: 100%;
   object-fit: cover;
 }
 
-.case-idea__dish span {
-  display: block;
-  padding: 16px 18px 20px;
+.case-idea__caption {
+  position: absolute;
+  z-index: 4;
+  bottom: 28px;
+  left: 50%;
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  padding: 0 15px;
+  border: 1px solid var(--case-line);
+  border-radius: 999px;
   color: var(--case-green-950);
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.4;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 34px rgba(29, 54, 0, 0.1);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  transform: translateX(-50%);
 }
 
 .case-principles {
@@ -2093,15 +2114,22 @@ img {
   }
 
   .case-idea__visual {
-    min-height: 720px;
+    min-height: 780px;
   }
 
   .case-idea__visual .case-device {
-    left: 32%;
+    left: 50%;
+    --device-width: 315px;
+    transform: translateX(-50%) rotate(-1deg);
   }
 
   .case-idea__dish {
-    right: 12%;
+    top: 190px;
+    right: 14%;
+  }
+
+  .case-idea__caption {
+    bottom: 52px;
   }
 
   .case-kitchen__copy {
@@ -2428,25 +2456,29 @@ img {
   }
 
   .case-idea__visual {
-    min-height: 580px;
+    min-height: 650px;
   }
 
   .case-idea__visual .case-device {
-    left: 43%;
-    --device-width: min(74vw, 290px);
-    transform: translateX(-50%) rotate(2deg);
+    left: 47%;
+    --device-width: min(72vw, 280px);
+    transform: translateX(-50%);
   }
 
   .case-idea__dish {
-    right: -6px;
-    bottom: 0;
-    width: 158px;
-    border-radius: 20px;
+    top: 140px;
+    right: -12px;
+    width: 112px;
+    height: 112px;
+    border-width: 6px;
   }
 
-  .case-idea__dish span {
-    padding: 12px;
-    font-size: 10px;
+  .case-idea__caption {
+    bottom: 0;
+    left: 47%;
+    min-height: 36px;
+    padding: 0 12px;
+    font-size: 9px;
   }
 
   .principle {

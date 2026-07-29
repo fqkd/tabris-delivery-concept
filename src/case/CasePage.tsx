@@ -305,16 +305,18 @@ export function CasePage() {
                 src={`${screenshots}/home.webp`}
                 alt="Главная страница с идеями для ужина"
               />
-              <div className="case-idea__dish">
+              <div className="case-idea__dish" aria-hidden="true">
                 <img
                   src={`${products}/syrniki.webp`}
-                  alt="Домашние сырники"
+                  alt=""
                   width="600"
                   height="600"
                   loading="lazy"
                 />
-                <span>Главная перед началом заказа</span>
               </div>
+              <span className="case-idea__caption">
+                Главная перед началом заказа
+              </span>
             </div>
           </div>
         </section>
