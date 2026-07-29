@@ -39,8 +39,7 @@ const statusPresentation: Record<
   placed: {
     eyebrow: 'Текущий статус',
     title: 'Заказ оформлен',
-    description:
-      'Заказ сохранён в браузере. Дальнейшие статусы в нём не меняются.',
+    description: 'Заказ оформлен и ожидает сборки.',
     icon: CheckCircle2,
   },
   assembling: {
@@ -69,20 +68,6 @@ const statusPresentation: Record<
   },
 }
 
-const formatLocationUpdate = (occurredAt: string | undefined) => {
-  if (!occurredAt) return 'Позиция обновлена недавно'
-  const minutes = Math.max(
-    0,
-    Math.round((Date.now() - Date.parse(occurredAt)) / 60_000),
-  )
-  if (minutes === 0) return 'Позиция обновлена только что'
-  if (minutes === 1) return 'Позиция обновлена минуту назад'
-  if (minutes >= 2 && minutes <= 4) {
-    return `Позиция обновлена ${minutes} минуты назад`
-  }
-  return `Позиция обновлена ${minutes} минут назад`
-}
-
 export function TrackingPage() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -104,8 +89,7 @@ export function TrackingPage() {
           <PackageOpen aria-hidden="true" />
           <h1 id="tracking-empty-title">Заказ для отслеживания не найден</h1>
           <p>
-            После демонстрационного оформления здесь появятся этапы сборки и
-            доставки.
+            После оформления здесь появятся этапы сборки и доставки.
           </p>
           <button
             type="button"
@@ -185,7 +169,7 @@ export function TrackingPage() {
             <div>
               <span>Демо-маршрут</span>
               <h2 id="route-title">Маршрут доставки</h2>
-              <p>{formatLocationUpdate(order.courierLocationUpdatedAt)}</p>
+              <p>Положение курьера обновляется на карте</p>
             </div>
             <Navigation aria-hidden="true" />
           </div>
@@ -250,22 +234,25 @@ export function TrackingPage() {
         <h2 id="tracking-summary-title">Детали заказа</h2>
         <dl>
           <div>
-            <dt>Товары и доставка</dt>
-            <dd>
-              {formatPrice(
-                order.totals.merchandiseSubtotal + order.totals.deliveryFee,
-              )}{' '}
-              ₽
-            </dd>
+            <dt>Товары</dt>
+            <dd>{formatPrice(order.totals.merchandiseSubtotal)} ₽</dd>
           </div>
           {order.totals.bonusSpent > 0 && (
             <div>
               <dt>Списано бонусов</dt>
-              <dd>−{formatPrice(order.totals.bonusSpent)} ₽</dd>
+              <dd>−{formatPrice(order.totals.bonusSpent)}</dd>
             </div>
           )}
+          <div>
+            <dt>Доставка</dt>
+            <dd>
+              {order.totals.deliveryFee === 0
+                ? 'Бесплатно'
+                : `${formatPrice(order.totals.deliveryFee)} ₽`}
+            </dd>
+          </div>
           <div className="tracking-summary__total">
-            <dt>Итого</dt>
+            <dt>К оплате</dt>
             <dd>{formatPrice(order.totals.payableTotal)} ₽</dd>
           </div>
         </dl>
@@ -288,7 +275,7 @@ export function TrackingPage() {
       </button>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
     </main>

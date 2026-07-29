@@ -1,4 +1,5 @@
 import {
+  AlertTriangle,
   Banknote,
   CalendarDays,
   Check,
@@ -24,8 +25,14 @@ import {
   calculateOrderTotals,
   getCartItems,
 } from '../lib/cart'
-import { formatPrice, formatProductCount } from '../lib/format'
+import {
+  formatBonusCount,
+  formatBonusNoun,
+  formatPrice,
+  formatProductCount,
+} from '../lib/format'
 import { createDeliverySlots } from '../lib/deliveryDates'
+import { getUndeliverableCartItems } from '../lib/deliveryAvailability'
 import {
   createDemoOrderId,
   createOrderSnapshot,
@@ -70,24 +77,27 @@ const paymentOptions: Array<{
   {
     value: 'card',
     title: 'Банковская карта',
-    description: 'Сохранить способ в составе заказа',
+    description: 'Оплата банковской картой',
     icon: CreditCard,
   },
   {
     value: 'sbp',
     title: 'СБП',
-    description: 'Альтернативный способ в интерфейсе',
+    description: 'Оплата через приложение банка',
     icon: Smartphone,
   },
 ]
 
 const demoOtherRecipient: DemoProfile = {
-  name: 'Гость · демо-получатель',
+  name: 'Гость',
   phone: '+7 ••• •••-00-00',
 }
 
 const getDayKey = (slot: DeliverySlot) =>
   slot.dateKey
+
+const createCityDeliverySlots = (_city: string) =>
+  createDeliverySlots()
 
 export function CheckoutPage() {
   const navigate = useNavigate()
@@ -96,13 +106,18 @@ export function CheckoutPage() {
     bonusBalance,
     cart,
     clearOrderedCart,
+    deliveryCity,
     electronicReceipts,
     openAddress,
     placeOrder,
     profile,
   } = useShop()
+  const [checkoutBonusBalance] = useState(() => bonusBalance)
   const cartItems = useMemo(() => getCartItems(cart), [cart])
-  const deliverySlots = useMemo(() => createDeliverySlots(), [])
+  const deliverySlots = useMemo(
+    () => createCityDeliverySlots(deliveryCity),
+    [deliveryCity],
+  )
   const dayOptions = useMemo(
     () =>
       Array.from(
@@ -119,9 +134,7 @@ export function CheckoutPage() {
   const [selectedDay, setSelectedDay] = useState(
     firstAvailableSlot ? getDayKey(firstAvailableSlot) : dayOptions[0]?.key ?? '',
   )
-  const [selectedSlot, setSelectedSlot] = useState<DeliverySlot | null>(
-    firstAvailableSlot ?? null,
-  )
+  const [selectedSlot, setSelectedSlot] = useState<DeliverySlot | null>(null)
   const [otherRecipient, setOtherRecipient] = useState(false)
   const [otherRecipientData, setOtherRecipientData] =
     useState<DemoProfile>(demoOtherRecipient)
@@ -133,23 +146,44 @@ export function CheckoutPage() {
   const [requestedBonusSpend, setRequestedBonusSpend] = useState(0)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
   const submitGuard = useRef(false)
+  const previousCity = useRef(deliveryCity)
 
   const recipient = otherRecipient ? otherRecipientData : profile
   const maxBonusSpend = useMemo(
-    () => calculateMaxBonusSpend(cart, bonusBalance),
-    [bonusBalance, cart],
+    () => calculateMaxBonusSpend(cart, checkoutBonusBalance),
+    [cart, checkoutBonusBalance],
   )
+  const undeliverableItems = useMemo(
+    () => getUndeliverableCartItems(cart, deliveryCity),
+    [cart, deliveryCity],
+  )
+  const deliveryIssue =
+    undeliverableItems.length > 0
+      ? 'Удалите товары, доступные только в магазине, перед оформлением'
+      : ''
 
   useEffect(() => {
     setRequestedBonusSpend((current) => Math.min(current, maxBonusSpend))
     if (maxBonusSpend === 0) setApplyBonus(false)
   }, [maxBonusSpend])
 
+  useEffect(() => {
+    if (previousCity.current === deliveryCity) return
+    previousCity.current = deliveryCity
+    setSelectedDay(
+      firstAvailableSlot
+        ? getDayKey(firstAvailableSlot)
+        : dayOptions[0]?.key ?? '',
+    )
+    setSelectedSlot(null)
+  }, [dayOptions, deliveryCity, firstAvailableSlot])
+
   const bonusSpend = applyBonus ? requestedBonusSpend : 0
   const totals = useMemo(
-    () => calculateOrderTotals(cart, bonusSpend, bonusBalance),
-    [bonusBalance, bonusSpend, cart],
+    () => calculateOrderTotals(cart, bonusSpend, checkoutBonusBalance),
+    [bonusSpend, cart, checkoutBonusBalance],
   )
   const errors = validateCheckout(
     {
@@ -158,6 +192,7 @@ export function CheckoutPage() {
       deliverySlot: selectedSlot,
       substitutionPolicy,
       paymentMethod,
+      deliveryIssue,
     },
     totals,
   )
@@ -184,6 +219,7 @@ export function CheckoutPage() {
     if (submitGuard.current || isSubmitting) return
 
     setSubmitAttempted(true)
+    setSubmitError('')
     if (
       checkoutHasErrors ||
       !selectedSlot ||
@@ -201,30 +237,36 @@ export function CheckoutPage() {
     submitGuard.current = true
     setSubmitting(true)
 
-    const createdAt = new Date()
-    const order = createOrderSnapshot({
-      id: createDemoOrderId(createdAt),
-      createdAt: createdAt.toISOString(),
-      cart,
-      address: {
-        ...address,
-        deliveryTime: `${selectedSlot.dayLabel}, ${selectedSlot.timeLabel}`,
-      },
-      deliverySlot: selectedSlot,
-      recipient,
-      substitutionPolicy,
-      paymentMethod,
-      courierComment: courierComment.trim(),
-      electronicReceipt: electronicReceipts,
-      totals,
-      bonusBalanceBefore: bonusBalance,
-    })
+    try {
+      const createdAt = new Date()
+      const order = createOrderSnapshot({
+        id: createDemoOrderId(createdAt),
+        createdAt: createdAt.toISOString(),
+        cart,
+        address: {
+          ...address,
+          deliveryTime: `${selectedSlot.dayLabel}, ${selectedSlot.timeLabel}`,
+        },
+        deliverySlot: selectedSlot,
+        recipient,
+        substitutionPolicy,
+        paymentMethod,
+        courierComment: courierComment.trim(),
+        electronicReceipt: electronicReceipts,
+        totals,
+        bonusBalanceBefore: checkoutBonusBalance,
+      })
 
-    placeOrder(order)
-    navigate(`/orders/${encodeURIComponent(order.id)}/success`, {
-      replace: true,
-    })
-    window.requestAnimationFrame(() => clearOrderedCart(order.id))
+      placeOrder(order)
+      navigate(`/orders/${encodeURIComponent(order.id)}/success`, {
+        replace: true,
+      })
+      window.requestAnimationFrame(() => clearOrderedCart(order.id))
+    } catch {
+      submitGuard.current = false
+      setSubmitting(false)
+      setSubmitError('Не удалось оформить заказ. Проверьте корзину и повторите.')
+    }
   }
 
   if (cartItems.length === 0 && !isSubmitting) {
@@ -264,6 +306,27 @@ export function CheckoutPage() {
         >
           <strong>Проверьте данные заказа</strong>
           <span>Незаполненные блоки отмечены ниже.</span>
+        </div>
+      )}
+
+      {undeliverableItems.length > 0 && (
+        <div className="delivery-blocker" role="alert">
+          <AlertTriangle aria-hidden="true" />
+          <span>
+            <strong>Есть товары только для покупки в магазине</strong>
+            <small>
+              {undeliverableItems
+                .map(({ product }) => product.name)
+                .join(', ')}
+              . Удалите их из корзины.
+            </small>
+          </span>
+        </div>
+      )}
+
+      {submitError && (
+        <div className="checkout-error-summary" role="alert">
+          <strong>{submitError}</strong>
         </div>
       )}
 
@@ -316,7 +379,7 @@ export function CheckoutPage() {
         <label className="switch-row">
           <span>
             <strong>Получит другой человек</strong>
-            <small>Покажем дополнительные демонстрационные поля</small>
+            <small>Укажите имя и телефон получателя</small>
           </span>
           <input
             type="checkbox"
@@ -553,13 +616,13 @@ export function CheckoutPage() {
           </span>
           <div>
             <h2 id="bonus-title">Табрис Бонус</h2>
-            <p>Доступно {formatPrice(bonusBalance)} бонусов</p>
+            <p>Доступно {formatBonusCount(checkoutBonusBalance)}</p>
           </div>
         </div>
         <label className="switch-row">
           <span>
             <strong>Применить бонусы</strong>
-            <small>Можно списать до {formatPrice(maxBonusSpend)}</small>
+            <small>Можно списать до {formatBonusCount(maxBonusSpend)}</small>
           </span>
           <input
             type="checkbox"
@@ -592,25 +655,27 @@ export function CheckoutPage() {
                   )
                 }}
               />
-              <small>бонусов</small>
+              <small>{formatBonusNoun(requestedBonusSpend)}</small>
             </span>
           </label>
         )}
         <dl className="bonus-result">
           <div>
             <dt>Будет начислено</dt>
-            <dd>+{formatPrice(totals.bonusEarned)}</dd>
+            <dd>+{formatBonusCount(totals.bonusEarned)}</dd>
           </div>
           <div>
             <dt>Остаток после списания</dt>
             <dd>
-              {formatPrice(bonusBalance - totals.bonusSpent)}
+              {formatBonusCount(
+                checkoutBonusBalance - totals.bonusSpent,
+              )}
             </dd>
           </div>
         </dl>
         <p className="demo-rule-note">
-          Акционные товары не участвуют в начислении. Доставка исключена из
-          бонусного расчёта в рамках демонстрационного допущения.
+          Акционные товары не участвуют в начислении. Доставка не оплачивается
+          бонусами.
         </p>
       </section>
 
@@ -659,7 +724,7 @@ export function CheckoutPage() {
       </section>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
 
@@ -672,7 +737,7 @@ export function CheckoutPage() {
           <button
             type="button"
             className="primary-button"
-            disabled={isSubmitting}
+            disabled={isSubmitting || undeliverableItems.length > 0}
             aria-describedby={
               !totals.minimumOrderReached ? 'minimum-order-error' : undefined
             }

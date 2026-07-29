@@ -1,6 +1,7 @@
-import { defaultFilters } from '../config/demoRules.ts'
-import { productIds } from '../data/products.ts'
+import { defaultFilters, isDeliveryCity } from '../config/demoRules.ts'
+import { getProduct, productIds } from '../data/products.ts'
 import { mergeCartAdditions, normalizeQuantity } from '../lib/cart.ts'
+import { isAvailableForDelivery } from '../lib/deliveryAvailability.ts'
 import type {
   CatalogFilters,
   CatalogSort,
@@ -16,6 +17,7 @@ export type ShopAction =
   | { type: 'REMOVE_CART_ITEM'; productId: string }
   | { type: 'CLEAR_CART' }
   | { type: 'TOGGLE_FAVORITE'; productId: string }
+  | { type: 'SELECT_DELIVERY_CITY'; city: string }
   | { type: 'CONFIRM_ADDRESS'; address: DeliveryAddress }
   | { type: 'SET_SEARCH_QUERY'; query: string }
   | { type: 'ADD_RECENT_QUERY'; query: string }
@@ -32,8 +34,16 @@ export const shopReducer = (
   action: ShopAction,
 ): PersistedShopState => {
   if (action.type === 'SET_QUANTITY') {
-    if (!productIds.has(action.productId)) return state
+    const product = getProduct(action.productId)
+    if (!product) return state
     const quantity = normalizeQuantity(action.quantity)
+    const currentQuantity = normalizeQuantity(state.cart[action.productId] ?? 0)
+    if (
+      !isAvailableForDelivery(product, state.deliveryCity) &&
+      quantity >= currentQuantity
+    ) {
+      return state
+    }
     const cart = { ...state.cart }
     if (quantity === 0) delete cart[action.productId]
     else cart[action.productId] = quantity
@@ -45,7 +55,13 @@ export const shopReducer = (
       ...state,
       cart: mergeCartAdditions(
         state.cart,
-        action.additions.filter((item) => productIds.has(item.productId)),
+        action.additions.filter((item) => {
+          const product = getProduct(item.productId)
+          return (
+            product !== undefined &&
+            isAvailableForDelivery(product, state.deliveryCity)
+          )
+        }),
       ),
     }
   }
@@ -69,9 +85,22 @@ export const shopReducer = (
     }
   }
 
-  if (action.type === 'CONFIRM_ADDRESS') {
+  if (action.type === 'SELECT_DELIVERY_CITY') {
+    if (!isDeliveryCity(action.city) || state.deliveryCity === action.city) {
+      return state
+    }
     return {
       ...state,
+      deliveryCity: action.city,
+      address: null,
+    }
+  }
+
+  if (action.type === 'CONFIRM_ADDRESS') {
+    if (!isDeliveryCity(action.address.city)) return state
+    return {
+      ...state,
+      deliveryCity: action.address.city,
       address: action.address,
     }
   }

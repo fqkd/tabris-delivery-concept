@@ -13,7 +13,7 @@ import { PageHeader } from '../components/PageHeader'
 import { favoriteCategoryIds } from '../config/demoRules'
 import { useShop } from '../context/ShopContext'
 import { getCategoryLabel } from '../data/catalogCategories'
-import { formatPrice } from '../lib/format'
+import { formatBonusCount } from '../lib/format'
 
 const decorativeBars = [
   2, 5, 1, 3, 6, 2, 4, 1, 5, 3, 2, 6, 1, 4, 2, 5, 1, 3, 6, 2, 4, 1,
@@ -40,7 +40,7 @@ export function BonusPage() {
 
         <div className="tabris-bonus-card__balance">
           <small>Демонстрационный баланс</small>
-          <strong>{formatPrice(bonusBalance)} бонусов</strong>
+          <strong>{formatBonusCount(bonusBalance)}</strong>
           <span>1 бонус = 1 ₽</span>
         </div>
 
@@ -81,7 +81,7 @@ export function BonusPage() {
         {lastOrder ? (
           <div className="tabris-bonus-earned">
             <span>
-              <strong>+{formatPrice(lastOrder.totals.bonusEarned)}</strong>
+              <strong>+{formatBonusCount(lastOrder.totals.bonusEarned)}</strong>
               <small>после выполнения</small>
             </span>
             <span>
@@ -91,7 +91,7 @@ export function BonusPage() {
           </div>
         ) : (
           <p className="tabris-bonus-section__empty">
-            После демонстрационного заказа здесь появится расчёт начисления.
+            После оформления заказа здесь появится расчёт начисления.
           </p>
         )}
       </section>
@@ -134,10 +134,10 @@ export function BonusPage() {
             <h2 id="bonus-receipts-title">Чеки в приложении</h2>
           </div>
         </div>
-        <DemoReceiptToggle description="Сохранять демонстрационные чеки в профиле" />
+        <DemoReceiptToggle description="Сохранять чеки в профиле" />
         <p className="tabris-bonus-section__hint">
-          Электронные чеки предусмотрены программой. Сам переключатель в этом
-          концепте работает только локально.
+          Электронные чеки предусмотрены программой. Настройка сохраняется на
+          этом устройстве.
         </p>
       </section>
 
@@ -189,7 +189,7 @@ export function BonusPage() {
             <ChevronRight aria-hidden="true" />
           </summary>
           <p>
-            Статус можно получить после покупок от 60 000 ₽ за период до 90
+            Статус можно получить после покупок свыше 60 000 ₽ за период до 90
             дней. Он действует 90 дней и добавляет ещё две любимые категории —
             всего их становится пять.
           </p>
@@ -197,7 +197,7 @@ export function BonusPage() {
       </section>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
     </main>

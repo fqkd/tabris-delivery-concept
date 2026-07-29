@@ -7,7 +7,9 @@ import { dinnerSets } from '../data/dinnerSets'
 import { getProduct } from '../data/products'
 import {
   calculateDinnerTotal,
+  describeDinnerSelection,
   dinnerItemsToCartAdditions,
+  getSelectedDinnerItems,
 } from '../lib/dinner'
 import { publicAssetUrl } from '../lib/deployment'
 import { formatPrice, formatProductCount } from '../lib/format'
@@ -24,8 +26,10 @@ export function DinnerBuilderPage() {
   const activeSet =
     dinnerSets.find((dinnerSet) => dinnerSet.id === activeSetId) ?? dinnerSets[0]
   const excludedProductIds = excludedBySet[activeSet.id] ?? []
-  const selectedItems = activeSet.items.filter(
-    (item) => !excludedProductIds.includes(item.productId),
+  const selectedItems = getSelectedDinnerItems(activeSet, excludedProductIds)
+  const selectedQuantity = selectedItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
   )
   const total = calculateDinnerTotal(activeSet, excludedProductIds)
 
@@ -110,7 +114,7 @@ export function DinnerBuilderPage() {
         <div className="dinner-composition__heading">
           <div>
             <h2 id="dinner-composition-title">{activeSet.name}</h2>
-            <p>{activeSet.description}</p>
+            <p>{describeDinnerSelection(activeSet, excludedProductIds)}</p>
           </div>
           <span>
             <UsersRound aria-hidden="true" />
@@ -181,8 +185,8 @@ export function DinnerBuilderPage() {
 
       <section className="dinner-total" aria-label="Итог набора">
         <div>
-          <span>Выбрано позиций</span>
-          <strong>{selectedItems.length} из {activeSet.items.length}</strong>
+          <span>В наборе</span>
+          <strong>{formatProductCount(selectedQuantity)}</strong>
         </div>
         <div>
           <span>Стоимость</span>
@@ -221,7 +225,7 @@ export function DinnerBuilderPage() {
       </section>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
     </main>

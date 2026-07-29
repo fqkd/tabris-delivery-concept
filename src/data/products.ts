@@ -126,7 +126,7 @@ export const products: Product[] = [
     typeLabel: 'Молодой сыр',
     keywords: ['сыр', 'итальянский сыр', 'сливки', 'моцарелла'],
     popularity: 86,
-    subcategory: 'Сыры',
+    subcategory: 'Сыр',
   },
   {
     id: 'artisan-bread',

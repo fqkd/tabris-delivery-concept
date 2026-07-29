@@ -4,6 +4,7 @@ import { PageHeader } from '../components/PageHeader'
 import { ProductCard } from '../components/ProductCard'
 import { useShop } from '../context/ShopContext'
 import { products } from '../data/products'
+import { formatProductCount } from '../lib/format'
 
 export function FavoritesPage() {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ export function FavoritesPage() {
         <section className="favorites-content" aria-labelledby="favorites-title">
           <div className="favorites-heading">
             <h2 id="favorites-title">Сохранённые товары</h2>
-            <span>{favoriteProducts.length}</span>
+            <span>{formatProductCount(favoriteProducts.length)}</span>
           </div>
           <div className="product-grid favorites-grid">
             {favoriteProducts.map((product) => (
@@ -49,7 +50,7 @@ export function FavoritesPage() {
       )}
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
     </main>

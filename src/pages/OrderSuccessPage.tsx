@@ -13,7 +13,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { useShop } from '../context/ShopContext'
 import { formatSavedDeliveryDate } from '../lib/deliveryDates'
-import { formatPrice, formatProductCount } from '../lib/format'
+import {
+  formatBonusCount,
+  formatPrice,
+  formatProductCount,
+} from '../lib/format'
 import { publicAssetUrl } from '../lib/deployment'
 import type { PaymentMethod } from '../types'
 
@@ -83,10 +87,7 @@ export function OrderSuccessPage() {
         </span>
         <span className="success-hero__eyebrow">Всё получилось</span>
         <h1 id="success-title">Заказ оформлен</h1>
-        <p>
-          Заказ сохранён в браузере. Дальнейшие статусы в нём не меняются — это
-          локальная демонстрация.
-        </p>
+        <p>Все детали заказа доступны в профиле.</p>
         <span className="success-hero__number">№ {order.id}</span>
       </section>
 
@@ -115,7 +116,7 @@ export function OrderSuccessPage() {
           <span>
             <small>Способ оплаты</small>
             <strong>{paymentLabels[order.paymentMethod]}</strong>
-            <span>Демонстрационный выбор</span>
+            <span>Выбрано при оформлении</span>
           </span>
         </div>
       </section>
@@ -126,7 +127,6 @@ export function OrderSuccessPage() {
             <h2 id="success-order-title">Состав заказа</h2>
             <span>{formatProductCount(order.totals.itemCount)}</span>
           </div>
-          <strong>{formatPrice(order.totals.payableTotal)} ₽</strong>
         </div>
         <ul className="order-preview-list">
           {order.lines.map((line) => (
@@ -149,13 +149,35 @@ export function OrderSuccessPage() {
             </li>
           ))}
         </ul>
+        <dl className="success-order__totals">
+          <div>
+            <dt>Товары</dt>
+            <dd>{formatPrice(order.totals.merchandiseSubtotal)} ₽</dd>
+          </div>
+          <div>
+            <dt>Списано бонусов</dt>
+            <dd>−{formatPrice(order.totals.bonusSpent)}</dd>
+          </div>
+          <div>
+            <dt>Доставка</dt>
+            <dd>
+              {order.totals.deliveryFee === 0
+                ? 'Бесплатно'
+                : `${formatPrice(order.totals.deliveryFee)} ₽`}
+            </dd>
+          </div>
+          <div className="success-order__total">
+            <dt>К оплате</dt>
+            <dd>{formatPrice(order.totals.payableTotal)} ₽</dd>
+          </div>
+        </dl>
       </section>
 
       <section className="success-bonus" aria-labelledby="success-bonus-title">
         <Award aria-hidden="true" />
         <span>
           <small id="success-bonus-title">Начислим после выполнения заказа</small>
-          <strong>+{formatPrice(order.totals.bonusEarned)} бонусов</strong>
+          <strong>+{formatBonusCount(order.totals.bonusEarned)}</strong>
         </span>
       </section>
 
@@ -185,7 +207,7 @@ export function OrderSuccessPage() {
       </div>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
     </main>

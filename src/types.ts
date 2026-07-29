@@ -156,6 +156,7 @@ export type OrderSnapshot = {
 export type PersistedShopState = {
   cart: CartState
   favoriteIds: string[]
+  deliveryCity: string
   address: DeliveryAddress | null
   search: SearchState
   profile: DemoProfile
@@ -170,6 +171,7 @@ export type DinnerSetItem = {
   productId: string
   quantity: number
   role: string
+  summaryLabel: string
 }
 
 export type DinnerSet = {

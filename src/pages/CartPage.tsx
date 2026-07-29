@@ -1,4 +1,11 @@
-import { Gift, MapPin, ShoppingBag, Trash2, Truck } from 'lucide-react'
+import {
+  AlertTriangle,
+  Gift,
+  MapPin,
+  ShoppingBag,
+  Trash2,
+  Truck,
+} from 'lucide-react'
 import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AppPortal } from '../components/AppPortal'
@@ -8,7 +15,15 @@ import { DEMO_RULES } from '../config/demoRules'
 import { useShop } from '../context/ShopContext'
 import { calculateOrderTotals, getCartItems } from '../lib/cart'
 import { publicAssetUrl } from '../lib/deployment'
-import { formatPrice, formatProductCount } from '../lib/format'
+import {
+  getDeliveryRestriction,
+  getUndeliverableCartItems,
+} from '../lib/deliveryAvailability'
+import {
+  formatBonusCount,
+  formatPrice,
+  formatProductCount,
+} from '../lib/format'
 
 export function CartPage() {
   const location = useLocation()
@@ -18,6 +33,7 @@ export function CartPage() {
     address,
     bonusBalance,
     cart,
+    deliveryCity,
     openAddress,
     removeFromCart,
     setQuantity,
@@ -27,6 +43,11 @@ export function CartPage() {
     () => calculateOrderTotals(cart, 0, bonusBalance),
     [bonusBalance, cart],
   )
+  const undeliverableItems = useMemo(
+    () => getUndeliverableCartItems(cart, deliveryCity),
+    [cart, deliveryCity],
+  )
+  const hasDeliveryRestrictions = undeliverableItems.length > 0
   const addressControl = (
     <button type="button" className="cart-address" onClick={openAddress}>
       <MapPin aria-hidden="true" />
@@ -35,7 +56,7 @@ export function CartPage() {
         <strong>
           {address
             ? `${address.city} · ${address.street}`
-            : 'Выберите адрес'}
+            : `${deliveryCity} · Укажите улицу и дом`}
         </strong>
       </span>
       <span>{address ? 'Изменить' : 'Выбрать'}</span>
@@ -94,7 +115,13 @@ export function CartPage() {
       {addressControl}
 
       <section className="cart-items" aria-label="Товары в корзине">
-        {cartItems.map(({ product, quantity }) => (
+        {cartItems.map(({ product, quantity }) => {
+          const deliveryRestriction = getDeliveryRestriction(
+            product,
+            deliveryCity,
+          )
+
+          return (
           <article className="cart-item" key={product.id}>
             <button
               type="button"
@@ -137,14 +164,20 @@ export function CartPage() {
               </div>
               <span className="cart-item__weight">{product.weight}</span>
               <div className="cart-item__bottomline">
-                <QuantityControl
-                  quantity={quantity}
-                  onChange={(nextQuantity) =>
-                    setQuantity(product.id, nextQuantity)
-                  }
-                  compact
-                  label={`Количество товара «${product.name}»`}
-                />
+                {deliveryRestriction ? (
+                  <span className="cart-item__restriction">
+                    {deliveryRestriction.label}
+                  </span>
+                ) : (
+                  <QuantityControl
+                    quantity={quantity}
+                    onChange={(nextQuantity) =>
+                      setQuantity(product.id, nextQuantity)
+                    }
+                    compact
+                    label={`Количество товара «${product.name}»`}
+                  />
+                )}
                 <span className="cart-item__price">
                   <strong>{formatPrice(product.price * quantity)} ₽</strong>
                   {product.oldPrice && (
@@ -154,8 +187,24 @@ export function CartPage() {
               </div>
             </div>
           </article>
-        ))}
+          )
+        })}
       </section>
+
+      {hasDeliveryRestrictions && (
+        <div className="delivery-blocker" role="alert">
+          <AlertTriangle aria-hidden="true" />
+          <span>
+            <strong>Эти товары нельзя доставить</strong>
+            <small>
+              {undeliverableItems
+                .map(({ product }) => product.name)
+                .join(', ')}
+              . Удалите их из корзины, чтобы перейти к оформлению.
+            </small>
+          </span>
+        </div>
+      )}
 
       {freeDeliveryRemainder > 0 && (
         <div className="free-delivery-card">
@@ -186,7 +235,7 @@ export function CartPage() {
         </span>
         <span>
           <small>Доступно</small>
-          <strong>{formatPrice(bonusBalance)} бонусов</strong>
+          <strong>{formatBonusCount(bonusBalance)}</strong>
         </span>
         <span>Можно применить при оформлении</span>
       </div>
@@ -218,7 +267,7 @@ export function CartPage() {
       </section>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
 
@@ -235,7 +284,9 @@ export function CartPage() {
           <button
             type="button"
             className="primary-button"
-            disabled={!totals.minimumOrderReached}
+            disabled={
+              !totals.minimumOrderReached || hasDeliveryRestrictions
+            }
             onClick={() => navigate('/checkout')}
           >
             Перейти к оформлению

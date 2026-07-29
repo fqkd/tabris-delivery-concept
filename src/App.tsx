@@ -126,7 +126,7 @@ function AppFrame() {
       <div className="app-scroll">
         <DocumentTitle />
         <ScrollManager />
-        <Routes>
+        <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomePage />} />
           <Route path="/catalog" element={<CatalogPage />} />
           <Route

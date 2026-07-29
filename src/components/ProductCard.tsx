@@ -2,6 +2,7 @@ import { Heart, Plus } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { useShop } from '../context/ShopContext'
 import { publicAssetUrl } from '../lib/deployment'
+import { getDeliveryRestriction } from '../lib/deliveryAvailability'
 import { discountPercent, formatPrice } from '../lib/format'
 import type { Product } from '../types'
 import { QuantityControl } from './QuantityControl'
@@ -22,6 +23,7 @@ export function ProductCard({
   const quantity = cart[product.id] ?? 0
   const discount = discountPercent(product.price, product.oldPrice)
   const favorite = isFavorite(product.id)
+  const deliveryRestriction = getDeliveryRestriction(product)
 
   return (
     <article className={`product-card product-card--${variant}`}>
@@ -62,8 +64,10 @@ export function ProductCard({
         >
           <Heart aria-hidden="true" />
         </button>
-        {product.unavailable && (
-          <span className="product-card__unavailable">Временно нет</span>
+        {deliveryRestriction && (
+          <span className="product-card__unavailable">
+            {deliveryRestriction.label}
+          </span>
         )}
       </div>
 
@@ -84,9 +88,17 @@ export function ProductCard({
             {product.oldPrice && <del>{formatPrice(product.oldPrice)} ₽</del>}
           </div>
 
-          {product.unavailable ? (
-            <button type="button" className="add-button" disabled>
-              Нет
+          {deliveryRestriction ? (
+            <button
+              type="button"
+              className={`add-button${
+                deliveryRestriction.code === 'store-only'
+                  ? ' add-button--store-only'
+                  : ''
+              }`}
+              disabled
+            >
+              {deliveryRestriction.code === 'store-only' ? 'В магазине' : 'Нет'}
             </button>
           ) : quantity > 0 ? (
             <QuantityControl

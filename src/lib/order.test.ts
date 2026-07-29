@@ -83,6 +83,59 @@ describe('order state consistency', () => {
     assert.equal(timeline[4].time, undefined)
   })
 
+  it('keeps prepared demo event times stable across reloads on the same day', () => {
+    const firstLoad = createDemoTrackingOrder(
+      new Date('2026-07-24T10:00:00.000Z'),
+    )
+    const secondLoad = createDemoTrackingOrder(
+      new Date('2026-07-24T10:25:00.000Z'),
+    )
+
+    assert.deepEqual(secondLoad.statusEvents, firstLoad.statusEvents)
+    assert.equal(
+      secondLoad.courierLocationUpdatedAt,
+      firstLoad.courierLocationUpdatedAt,
+    )
+  })
+
+  it('refuses to create a delivery order with alcohol from legacy storage', () => {
+    const cart = { 'sparkling-asti': 1 }
+    const input = {
+      id: 'ДЕМО-BLOCKED',
+      createdAt: '2026-07-24T09:00:00.000Z',
+      cart,
+      address: {
+        city: 'Краснодар',
+        street: 'ул. Демонстрационная, 12',
+        deliveryTime: 'Завтра, 10:00–12:00',
+      },
+      deliverySlot: {
+        id: '2026-07-25-1000',
+        dateKey: '2026-07-25',
+        dayLabel: 'Завтра',
+        dateLabel: '25 июля',
+        timeLabel: '10:00–12:00',
+        available: true,
+      },
+      recipient: defaultProfile,
+      substitutionPolicy: 'similar' as const,
+      paymentMethod: 'card' as const,
+      courierComment: '',
+      electronicReceipt: true,
+      totals: calculateOrderTotals(
+        cart,
+        0,
+        DEMO_RULES.initialBonusBalance,
+      ),
+      bonusBalanceBefore: DEMO_RULES.initialBonusBalance,
+    }
+
+    assert.throws(
+      () => createOrderSnapshot(input),
+      /недоступные для доставки/,
+    )
+  })
+
   it('keeps multiple orders and the previous order addressable by id', () => {
     const first = createPlacedOrder(
       'ДЕМО-FIRST',
@@ -107,6 +160,44 @@ describe('order state consistency', () => {
       afterSecond.orders.find((order) => order.id === first.id)?.id,
       first.id,
     )
+  })
+
+  it('does not save the same order or deduct its bonuses twice', () => {
+    const cart = { 'striploin-steak': 1 }
+    const totals = calculateOrderTotals(
+      cart,
+      500,
+      DEMO_RULES.initialBonusBalance,
+    )
+    const base = createPlacedOrder(
+      'ДЕМО-ONCE',
+      '2026-07-24T09:00:00.000Z',
+    )
+    const order = createOrderSnapshot({
+      id: base.id,
+      createdAt: base.createdAt,
+      cart,
+      address: base.address,
+      deliverySlot: base.deliverySlot,
+      recipient: base.recipient,
+      substitutionPolicy: base.substitutionPolicy,
+      paymentMethod: base.paymentMethod,
+      courierComment: '',
+      electronicReceipt: true,
+      totals,
+      bonusBalanceBefore: DEMO_RULES.initialBonusBalance,
+    })
+    const afterFirst = shopReducer(createDefaultPersistedState(), {
+      type: 'SAVE_ORDER',
+      order,
+    })
+    const afterSecond = shopReducer(afterFirst, {
+      type: 'SAVE_ORDER',
+      order,
+    })
+
+    assert.equal(afterSecond.orders.length, 1)
+    assert.equal(afterSecond.bonusBalance, order.bonusBalanceAfter)
   })
 
   it('migrates the former lastOrder snapshot without losing it', () => {

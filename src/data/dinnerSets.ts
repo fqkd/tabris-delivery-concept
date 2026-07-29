@@ -8,10 +8,10 @@ export const dinnerSets: DinnerSet[] = [
     people: 2,
     servingTime: '12 минут',
     items: [
-      { productId: 'chicken-mushroom-pasta', quantity: 2, role: 'Основное блюдо' },
-      { productId: 'salad-roast-beef', quantity: 1, role: 'Салат' },
-      { productId: 'pear-sage-lemonade', quantity: 1, role: 'Напиток' },
-      { productId: 'signature-dessert', quantity: 2, role: 'Десерт' },
+      { productId: 'chicken-mushroom-pasta', quantity: 2, role: 'Основное блюдо', summaryLabel: 'паста' },
+      { productId: 'salad-roast-beef', quantity: 1, role: 'Салат', summaryLabel: 'салат' },
+      { productId: 'pear-sage-lemonade', quantity: 1, role: 'Напиток', summaryLabel: 'лимонад' },
+      { productId: 'signature-dessert', quantity: 2, role: 'Десерт', summaryLabel: 'десерт' },
     ],
   },
   {
@@ -21,10 +21,10 @@ export const dinnerSets: DinnerSet[] = [
     people: 2,
     servingTime: '8 минут',
     items: [
-      { productId: 'korean-beef-rice', quantity: 2, role: 'Основное блюдо' },
-      { productId: 'syrniki', quantity: 1, role: 'Закуска' },
-      { productId: 'berry-mors', quantity: 1, role: 'Напиток' },
-      { productId: 'butter-croissant', quantity: 2, role: 'Выпечка' },
+      { productId: 'korean-beef-rice', quantity: 2, role: 'Основное блюдо', summaryLabel: 'горячее' },
+      { productId: 'syrniki', quantity: 1, role: 'Закуска', summaryLabel: 'сырники' },
+      { productId: 'berry-mors', quantity: 1, role: 'Напиток', summaryLabel: 'морс' },
+      { productId: 'butter-croissant', quantity: 2, role: 'Выпечка', summaryLabel: 'выпечка' },
     ],
   },
   {
@@ -34,10 +34,10 @@ export const dinnerSets: DinnerSet[] = [
     people: 2,
     servingTime: 'Подать сразу',
     items: [
-      { productId: 'salmon-roll', quantity: 1, role: 'Основное блюдо' },
-      { productId: 'burrata', quantity: 1, role: 'Закуска' },
-      { productId: 'pear-sage-lemonade', quantity: 1, role: 'Напиток' },
-      { productId: 'signature-dessert', quantity: 2, role: 'Десерт' },
+      { productId: 'salmon-roll', quantity: 1, role: 'Основное блюдо', summaryLabel: 'роллы' },
+      { productId: 'burrata', quantity: 1, role: 'Закуска', summaryLabel: 'буррата' },
+      { productId: 'pear-sage-lemonade', quantity: 1, role: 'Напиток', summaryLabel: 'лимонад' },
+      { productId: 'signature-dessert', quantity: 2, role: 'Десерт', summaryLabel: 'десерт' },
     ],
   },
 ]

@@ -5,6 +5,7 @@ import {
   Heart,
   Leaf,
   ShoppingBag,
+  Store,
 } from 'lucide-react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AppPortal } from '../components/AppPortal'
@@ -13,7 +14,12 @@ import { useShop } from '../context/ShopContext'
 import { getProduct } from '../data/products'
 import { calculateProductBonus } from '../lib/cart'
 import { publicAssetUrl } from '../lib/deployment'
-import { discountPercent, formatPrice } from '../lib/format'
+import { getDeliveryRestriction } from '../lib/deliveryAvailability'
+import {
+  discountPercent,
+  formatBonusCount,
+  formatPrice,
+} from '../lib/format'
 
 export function ProductPage() {
   const { productId } = useParams()
@@ -37,6 +43,7 @@ export function ProductPage() {
   const discount = discountPercent(product.price, product.oldPrice)
   const favorite = isFavorite(product.id)
   const bonus = calculateProductBonus(product)
+  const deliveryRestriction = getDeliveryRestriction(product)
   const sourcePath = (location.state as { from?: string } | null)?.from
 
   return (
@@ -115,6 +122,16 @@ export function ProductPage() {
 
         <p className="product-detail__description">{product.description}</p>
 
+        {deliveryRestriction && (
+          <div className="delivery-restriction-note" role="note">
+            <Store aria-hidden="true" />
+            <span>
+              <strong>{deliveryRestriction.label}</strong>
+              <small>{deliveryRestriction.explanation}</small>
+            </span>
+          </div>
+        )}
+
         <div className="product-info-card">
           <div>
             <Leaf aria-hidden="true" />
@@ -138,14 +155,16 @@ export function ProductPage() {
             <small>{bonus > 0 ? 'Начислим за покупку' : 'Табрис Бонус'}</small>
             <strong>
               {bonus > 0
-                ? `+${formatPrice(bonus)} бонусов`
-                : 'За акционный товар бонусы не начисляются'}
+                ? `+${formatBonusCount(bonus)}`
+                : product.unavailable
+                  ? 'Товар временно недоступен'
+                  : 'За акционный товар бонусы не начисляются'}
             </strong>
           </span>
         </div>
 
         <p className="concept-note concept-note--product">
-          Неофициальный концепт мобильного приложения “Табрис”. Создан для
+          Неофициальный концепт мобильного приложения «Табрис». Создан для
           демонстрации.
         </p>
       </div>
@@ -154,7 +173,15 @@ export function ProductPage() {
 
       <AppPortal>
         <div className="product-purchase-bar">
-          {quantity > 0 ? (
+          {deliveryRestriction ? (
+            <button
+              type="button"
+              className="primary-button primary-button--wide"
+              disabled
+            >
+              {deliveryRestriction.label}
+            </button>
+          ) : quantity > 0 ? (
             <>
               <QuantityControl
                 quantity={quantity}
@@ -179,12 +206,9 @@ export function ProductPage() {
             <button
               type="button"
               className="primary-button primary-button--wide"
-              disabled={product.unavailable}
               onClick={() => setQuantity(product.id, 1)}
             >
-              {product.unavailable
-                ? 'Временно нет в наличии'
-                : `Добавить в корзину · ${formatPrice(product.price)} ₽`}
+              Добавить в корзину · {formatPrice(product.price)} ₽
             </button>
           )}
         </div>

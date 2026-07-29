@@ -58,11 +58,14 @@ const productToBonusLine = (
   quantity: number,
 ): BonusCalculationLine => ({
   amount: product.price * normalizeQuantity(quantity),
+  minimumCashUnits: normalizeQuantity(quantity),
   accrualRate: favoriteCategoryIds.includes(product.categoryId)
     ? DEMO_RULES.bonusFavoriteRate
     : DEMO_RULES.bonusBaseRate,
   accrualEligible:
-    !isSaleProduct(product) && !product.bonusAccrualExcluded,
+    !product.unavailable &&
+    !isSaleProduct(product) &&
+    !product.bonusAccrualExcluded,
   redemptionEligible: !product.bonusRedemptionExcluded,
 })
 
@@ -87,7 +90,7 @@ export const calculateMaxBonusSpend = (
   return calculateMaximumBonusSpend(
     cartToBonusLines(cart),
     availableBalance,
-    DEMO_RULES.minimumCashPayment,
+    DEMO_RULES.minimumCashPaymentPerUnit,
   )
 }
 

@@ -774,7 +774,7 @@ export function CasePage() {
                   <MapPin aria-hidden="true" />
                   <span>
                     <small>Карта</small>
-                    <strong>Обновлена 2 минуты назад</strong>
+                    <strong>Положение обновляется на карте</strong>
                   </span>
                 </div>
                 <p className="tracking-facts__note">

@@ -1,5 +1,6 @@
 export type BonusCalculationLine = {
   amount: number
+  minimumCashUnits: number
   accrualRate: number
   accrualEligible: boolean
   redemptionEligible: boolean
@@ -31,22 +32,43 @@ export const calculateRedeemableAmount = (
     ),
   )
 
+const calculateLineRedemptionCapacity = (
+  line: BonusCalculationLine,
+  minimumCashPaymentPerUnit: number,
+) => {
+  if (!line.redemptionEligible) return 0
+
+  const amount = normalizeBonusAmount(line.amount)
+  const units = Number.isFinite(line.minimumCashUnits)
+    ? Math.max(0, line.minimumCashUnits)
+    : 0
+  const requiredCash = roundBonusAmount(
+    normalizeBonusAmount(minimumCashPaymentPerUnit) * units,
+  )
+
+  return roundBonusAmount(Math.max(0, amount - requiredCash))
+}
+
 export const calculateMaximumBonusSpend = (
   lines: BonusCalculationLine[],
   availableBalance: number,
-  minimumCashPayment = 1,
+  minimumCashPaymentPerUnit = 1,
 ) => {
-  const merchandiseAmount = calculateMerchandiseAmount(lines)
-  const redeemableAmount = calculateRedeemableAmount(lines)
   const balance = normalizeBonusAmount(availableBalance)
-  const requiredCash = normalizeBonusAmount(minimumCashPayment)
+  const redeemableAmount = roundBonusAmount(
+    lines.reduce(
+      (sum, line) =>
+        sum +
+        calculateLineRedemptionCapacity(
+          line,
+          minimumCashPaymentPerUnit,
+        ),
+      0,
+    ),
+  )
 
   return roundBonusAmount(
-    Math.min(
-      balance,
-      redeemableAmount,
-      Math.max(0, merchandiseAmount - requiredCash),
-    ),
+    Math.min(balance, redeemableAmount),
   )
 }
 
@@ -64,21 +86,28 @@ export const clampBonusSpend = (
 export const calculateEarnedBonus = (
   lines: BonusCalculationLine[],
   bonusSpent = 0,
+  minimumCashPaymentPerUnit = 1,
 ) => {
-  const redeemableAmount = calculateRedeemableAmount(lines)
+  const redemptionCapacities = lines.map((line) =>
+    calculateLineRedemptionCapacity(line, minimumCashPaymentPerUnit),
+  )
+  const redeemableAmount = roundBonusAmount(
+    redemptionCapacities.reduce((sum, capacity) => sum + capacity, 0),
+  )
   const appliedSpend = Math.min(
     normalizeBonusAmount(bonusSpent),
     redeemableAmount,
   )
 
-  const earned = lines.reduce((sum, line) => {
+  const earned = lines.reduce((sum, line, index) => {
     if (!line.accrualEligible || line.amount <= 0 || line.accrualRate <= 0) {
       return sum
     }
 
     const allocatedSpend =
       line.redemptionEligible && redeemableAmount > 0
-        ? appliedSpend * (line.amount / redeemableAmount)
+        ? appliedSpend *
+          (redemptionCapacities[index] / redeemableAmount)
         : 0
     const cashPaidForLine = Math.max(0, line.amount - allocatedSpend)
     return sum + cashPaidForLine * line.accrualRate

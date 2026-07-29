@@ -1,5 +1,6 @@
 import { getCartItems } from './cart.ts'
 import { roundBonusAmount } from './bonus.ts'
+import { getUndeliverableCartItems } from './deliveryAvailability.ts'
 import type {
   CartState,
   DeliveryAddress,
@@ -18,6 +19,7 @@ export type CheckoutInput = {
   deliverySlot: DeliverySlot | null
   substitutionPolicy: SubstitutionPolicy | null
   paymentMethod: PaymentMethod | null
+  deliveryIssue?: string
 }
 
 export const validateCheckout = (
@@ -28,12 +30,13 @@ export const validateCheckout = (
   recipient:
     input.recipient.name.trim().length >= 2 && input.recipient.phone.trim()
       ? ''
-      : 'Укажите демонстрационные данные получателя',
+      : 'Укажите имя и телефон получателя',
   deliverySlot: input.deliverySlot ? '' : 'Выберите интервал доставки',
   substitutionPolicy: input.substitutionPolicy
     ? ''
     : 'Выберите правило замены товаров',
   paymentMethod: input.paymentMethod ? '' : 'Выберите способ оплаты',
+  delivery: input.deliveryIssue ?? '',
   minimumOrder: totals.minimumOrderReached
     ? ''
     : 'Минимальная сумма товаров ещё не достигнута',
@@ -69,7 +72,12 @@ type CreateOrderSnapshotInput = {
 
 export const createOrderSnapshot = (
   input: CreateOrderSnapshotInput,
-): OrderSnapshot => ({
+): OrderSnapshot => {
+  if (getUndeliverableCartItems(input.cart, input.address.city).length > 0) {
+    throw new Error('Корзина содержит товары, недоступные для доставки')
+  }
+
+  return {
   id: input.id,
   createdAt: input.createdAt,
   status: 'placed',
@@ -100,7 +108,8 @@ export const createOrderSnapshot = (
   bonusBalanceAfter: roundBonusAmount(
     Math.max(0, input.bonusBalanceBefore - input.totals.bonusSpent),
   ),
-})
+  }
+}
 
 export type TrackingStep = {
   id: OrderStatus
@@ -129,7 +138,7 @@ export const buildTrackingTimeline = (order: OrderSnapshot): TrackingStep[] => {
     {
       id: 'placed',
       label: orderStatusLabels.placed,
-      description: 'Данные заказа сохранены в браузере',
+      description: 'Заказ оформлен и ожидает сборки',
     },
     {
       id: 'assembling',
@@ -144,7 +153,7 @@ export const buildTrackingTimeline = (order: OrderSnapshot): TrackingStep[] => {
     {
       id: 'delivering',
       label: orderStatusLabels.delivering,
-      description: 'Курьер следует по демо-маршруту к адресу',
+      description: 'Курьер едет по указанному адресу',
     },
     {
       id: 'delivered',

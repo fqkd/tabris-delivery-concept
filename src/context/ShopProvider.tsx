@@ -76,6 +76,8 @@ export function ShopProvider({ children }: ShopProviderProps) {
         isFavorite: (productId: string) => state.favoriteIds.includes(productId),
         openAddress: () => setAddressOpen(true),
         closeAddress: () => setAddressOpen(false),
+        selectDeliveryCity: (city: string) =>
+          dispatch({ type: 'SELECT_DELIVERY_CITY', city }),
         confirmAddress: (address: DeliveryAddress) => {
           dispatch({ type: 'CONFIRM_ADDRESS', address })
           setAddressOpen(false)

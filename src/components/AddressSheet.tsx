@@ -29,12 +29,14 @@ export function AddressSheet() {
   const navigate = useNavigate()
   const {
     address,
+    deliveryCity,
     isAddressOpen,
     closeAddress,
     confirmAddress,
+    selectDeliveryCity,
   } = useShop()
   const [city, setCity] = useState<DeliveryCity>(() =>
-    getInitialCity(address?.city),
+    getInitialCity(deliveryCity),
   )
   const [street, setStreet] = useState(address?.street ?? '')
   const dialogRef = useRef<HTMLElement>(null)
@@ -107,12 +109,14 @@ export function AddressSheet() {
 
   useEffect(() => {
     if (isAddressOpen) {
-      setCity(getInitialCity(address?.city))
-      setStreet(address?.street ?? '')
+      setCity(getInitialCity(deliveryCity))
+      setStreet(
+        address?.city === deliveryCity ? address.street : '',
+      )
       previousFocusRef.current = document.activeElement as HTMLElement | null
       window.requestAnimationFrame(() => inputRef.current?.focus())
     }
-  }, [address?.city, address?.street, isAddressOpen])
+  }, [address?.city, address?.street, deliveryCity, isAddressOpen])
 
   useEffect(() => {
     if (!isAddressOpen) return
@@ -152,16 +156,14 @@ export function AddressSheet() {
   if (!isAddressOpen || !hasModalHistory) return null
 
   const chooseCity = (nextCity: DeliveryCity) => {
+    if (nextCity === city) return
     setCity(nextCity)
-    const confirmedStreet = street.trim()
-    if (!confirmedStreet) return
-
-    confirmSheetAddress({
-      city: nextCity,
-      street: confirmedStreet,
-      deliveryTime: nearestDeliveryTime,
-    })
+    setStreet('')
+    selectDeliveryCity(nextCity)
+    window.requestAnimationFrame(() => inputRef.current?.focus())
   }
+  const savedStreet = 'ул. Демонстрационная, 12'
+  const savedAddressSelected = street.trim() === savedStreet
 
   return (
     <div className="sheet-overlay" role="presentation">
@@ -232,11 +234,12 @@ export function AddressSheet() {
 
         <button
           type="button"
-          className="saved-address"
-          onClick={() => setStreet('ул. Демонстрационная, 12')}
+          className={`saved-address${savedAddressSelected ? ' is-selected' : ''}`}
+          aria-pressed={savedAddressSelected}
+          onClick={() => setStreet(savedStreet)}
         >
           <span className="saved-address__icon">
-            <Check aria-hidden="true" />
+            {savedAddressSelected && <Check aria-hidden="true" />}
           </span>
           <span>
             <strong>ул. Демонстрационная, 12</strong>

@@ -71,7 +71,7 @@ export function ProfilePage() {
             <small>
               {address
                 ? `${address.city} · ${address.deliveryTime}`
-                : 'Он сохранится в этом демонстрационном профиле'}
+                : 'Адрес появится здесь после подтверждения'}
             </small>
           </span>
           <span className="profile-action-row__action">
@@ -98,7 +98,7 @@ export function ProfilePage() {
           </span>
           <span className="profile-action-row__copy">
             <strong>Карта, баланс и любимые категории</strong>
-            <small>Открыть демонстрационный раздел программы</small>
+            <small>Открыть раздел программы</small>
           </span>
           <ChevronRight aria-hidden="true" />
         </button>
@@ -161,8 +161,7 @@ export function ProfilePage() {
             <div>
               <strong>Заказов пока нет</strong>
               <p>
-                После демонстрационного оформления здесь появятся заказ и его
-                статус.
+                После оформления здесь появятся заказ и его статус.
               </p>
             </div>
             <button
@@ -224,8 +223,7 @@ export function ProfilePage() {
         </div>
         <DemoReceiptToggle />
         <p className="profile-section__hint">
-          Переключатель работает локально и сохраняется только для демонстрации
-          интерфейса.
+          Настройка сохранится на этом устройстве.
         </p>
       </section>
 
@@ -234,14 +232,14 @@ export function ProfilePage() {
         <div>
           <h2 id="profile-about-title">О приложении</h2>
           <p>
-            Интерактивный концепт собственного сервиса доставки. Заказы,
-            оплата, карта и данные профиля не отправляются во внешние системы.
+            Инициативная концепция сервиса доставки. Заказы, оплата и данные
+            профиля никуда не отправляются.
           </p>
         </div>
       </section>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
     </main>

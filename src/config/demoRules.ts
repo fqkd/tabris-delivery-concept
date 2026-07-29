@@ -12,14 +12,14 @@ export const DEMO_RULES = {
   assemblyTime: '60–90 минут',
   bonusBaseRate: 0.05,
   bonusFavoriteRate: 0.1,
-  minimumCashPayment: 1,
+  minimumCashPaymentPerUnit: 1,
   initialBonusBalance: 2480,
   maxCartQuantity: 99,
   commentMaxLength: 140,
 } as const
 
 export const defaultProfile: DemoProfile = {
-  name: 'Алексей · демо-профиль',
+  name: 'Алексей',
   phone: '+7 ••• •••-42-18',
 }
 

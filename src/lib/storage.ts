@@ -3,6 +3,7 @@ import {
   defaultFilters,
   defaultProfile,
   defaultSearchState,
+  deliveryCities,
   isDeliveryCity,
 } from '../config/demoRules.ts'
 import { productIds } from '../data/products.ts'
@@ -33,7 +34,7 @@ import type {
 } from '../types'
 
 const STORAGE_KEY = 'tabris-concept-state'
-const STORAGE_VERSION = 4
+const STORAGE_VERSION = 5
 
 type UnknownRecord = Record<string, unknown>
 
@@ -58,6 +59,7 @@ const safeNumber = (
 export const createDefaultPersistedState = (): PersistedShopState => ({
   cart: {},
   favoriteIds: [],
+  deliveryCity: deliveryCities[0],
   address: null,
   search: {
     ...defaultSearchState,
@@ -393,6 +395,7 @@ const sanitizeOrder = (value: unknown): OrderSnapshot | null => {
 const sanitizePersistedState = (value: unknown): PersistedShopState => {
   const defaults = createDefaultPersistedState()
   if (!isRecord(value)) return defaults
+  const address = sanitizeAddress(value.address)
 
   const favoriteIds = Array.isArray(value.favoriteIds)
     ? [...new Set(
@@ -449,7 +452,10 @@ const sanitizePersistedState = (value: unknown): PersistedShopState => {
   return {
     cart: sanitizeCart(value.cart),
     favoriteIds,
-    address: sanitizeAddress(value.address),
+    deliveryCity: isDeliveryCity(value.deliveryCity)
+      ? value.deliveryCity
+      : address?.city ?? deliveryCities[0],
+    address,
     search: sanitizeSearch(value.search),
     profile: sanitizeProfile(value.profile),
     electronicReceipts: value.electronicReceipts !== false,
@@ -481,10 +487,12 @@ const migrateLegacySession = (): PersistedShopState => {
     )
     const addressConfirmed =
       sessionStorage.getItem('tabris-concept-address-confirmed') === 'true'
+    const address = addressConfirmed ? sanitizeAddress(legacyAddress) : null
     return {
       ...defaults,
       cart: sanitizeCart(legacyCart),
-      address: addressConfirmed ? sanitizeAddress(legacyAddress) : null,
+      deliveryCity: address?.city ?? defaults.deliveryCity,
+      address,
     }
   } catch {
     return defaults
@@ -496,6 +504,9 @@ export const loadPersistedState = (): PersistedShopState => {
     const parsed = parseJson(localStorage.getItem(STORAGE_KEY))
     if (isRecord(parsed)) {
       if (parsed.version === STORAGE_VERSION) {
+        return sanitizePersistedState(parsed.data)
+      }
+      if (parsed.version === 4 && isRecord(parsed.data)) {
         return sanitizePersistedState(parsed.data)
       }
       if (parsed.version === 3 && isRecord(parsed.data)) {

@@ -1,5 +1,5 @@
-import { getProduct } from '../data/products'
-import type { CartAddition, DinnerSet } from '../types'
+import { getProduct } from '../data/products.ts'
+import type { CartAddition, DinnerSet } from '../types.ts'
 
 export const getSelectedDinnerItems = (
   dinnerSet: DinnerSet,
@@ -9,6 +9,20 @@ export const getSelectedDinnerItems = (
     .filter((item) => !excludedProductIds.includes(item.productId))
     .map((item) => ({ ...item, product: getProduct(item.productId) }))
     .filter((item) => Boolean(item.product))
+
+export const describeDinnerSelection = (
+  dinnerSet: DinnerSet,
+  excludedProductIds: string[],
+) => {
+  const labels = getSelectedDinnerItems(dinnerSet, excludedProductIds).map(
+    (item) => item.summaryLabel,
+  )
+
+  if (labels.length === 0) return 'В наборе пока нет товаров.'
+  if (labels.length === 1) return `В наборе: ${labels[0]}.`
+
+  return `В наборе: ${labels.slice(0, -1).join(', ')} и ${labels.at(-1)}.`
+}
 
 export const calculateDinnerTotal = (
   dinnerSet: DinnerSet,

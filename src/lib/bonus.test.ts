@@ -13,6 +13,7 @@ const line = (
   overrides: Partial<BonusCalculationLine> = {},
 ): BonusCalculationLine => ({
   amount,
+  minimumCashUnits: 1,
   accrualRate: 0.05,
   accrualEligible: true,
   redemptionEligible: true,
@@ -28,13 +29,49 @@ describe('bonus calculations', () => {
     assert.equal(calculateMaximumBonusSpend([line(500)], 125.45), 125.45)
   })
 
-  it('keeps one ruble payable when the balance exceeds the order value', () => {
+  it('keeps one ruble payable for one product unit', () => {
     assert.equal(calculateMaximumBonusSpend([line(500)], 5_000), 499)
   })
 
-  it('allows redemption on a discounted item but does not accrue for it', () => {
-    const saleLine = line(300, { accrualEligible: false })
-    assert.equal(calculateMaximumBonusSpend([saleLine], 500), 299)
+  it('keeps one ruble for each of several units of one product', () => {
+    assert.equal(
+      calculateMaximumBonusSpend(
+        [line(1_344, { minimumCashUnits: 6 })],
+        5_000,
+      ),
+      1_338,
+    )
+  })
+
+  it('sums the cash remainder across different products', () => {
+    assert.equal(
+      calculateMaximumBonusSpend(
+        [
+          line(500, { minimumCashUnits: 1 }),
+          line(300, { minimumCashUnits: 2 }),
+        ],
+        5_000,
+      ),
+      797,
+    )
+  })
+
+  it('uses the purchased kilogram amount for a weighted product', () => {
+    assert.equal(
+      calculateMaximumBonusSpend(
+        [line(300, { minimumCashUnits: 0.75 })],
+        5_000,
+      ),
+      299.25,
+    )
+  })
+
+  it('uses the discounted price and does not accrue on a sale item', () => {
+    const saleLine = line(300, {
+      minimumCashUnits: 2,
+      accrualEligible: false,
+    })
+    assert.equal(calculateMaximumBonusSpend([saleLine], 500), 298)
     assert.equal(calculateEarnedBonus([saleLine]), 0)
   })
 
@@ -92,6 +129,6 @@ describe('bonus calculations', () => {
       line(200),
     ]
 
-    assert.equal(calculateMaximumBonusSpend(lines, 1_000), 200)
+    assert.equal(calculateMaximumBonusSpend(lines, 1_000), 199)
   })
 })

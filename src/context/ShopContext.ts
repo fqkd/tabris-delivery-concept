@@ -13,6 +13,7 @@ import type {
 export type ShopContextValue = {
   cart: CartState
   favoriteIds: string[]
+  deliveryCity: string
   address: DeliveryAddress | null
   isAddressOpen: boolean
   cartCount: number
@@ -31,6 +32,7 @@ export type ShopContextValue = {
   isFavorite: (productId: string) => boolean
   openAddress: () => void
   closeAddress: () => void
+  selectDeliveryCity: (city: string) => void
   confirmAddress: (address: DeliveryAddress) => void
   setSearchQuery: (query: string) => void
   addRecentQuery: (query: string) => void

@@ -20,7 +20,7 @@ import { useShop } from '../context/ShopContext'
 import { products } from '../data/products'
 import { getNearestDeliveryTimeLabel } from '../lib/deliveryDates'
 import { publicAssetUrl } from '../lib/deployment'
-import { formatPrice } from '../lib/format'
+import { formatBonusCount } from '../lib/format'
 import type { ProductCategoryId } from '../types'
 
 type Category = {
@@ -41,7 +41,7 @@ const categories: Category[] = [
     icon: Utensils,
     categoryId: 'own-production',
   },
-  { label: 'Сыры', icon: Milk, categoryId: 'cheese' },
+  { label: 'Сыр', icon: Milk, categoryId: 'cheese' },
   {
     label: 'Выпечка',
     icon: Wheat,
@@ -99,9 +99,10 @@ export function HomePage() {
   const navigate = useNavigate()
   const {
     address,
-    openAddress,
-    cartCount,
     bonusBalance,
+    cartCount,
+    deliveryCity,
+    openAddress,
     resetSearch,
     setSearchFilters,
   } = useShop()
@@ -149,7 +150,7 @@ export function HomePage() {
           <strong>
             {address
               ? `${address.city} · ${address.street}`
-              : 'Выберите адрес'}
+              : `${deliveryCity} · Укажите улицу и дом`}
           </strong>
         </span>
         <ChevronDown aria-hidden="true" />
@@ -180,7 +181,7 @@ export function HomePage() {
         </span>
         <span>
           <small>Табрис Бонус</small>
-          <strong>{formatPrice(bonusBalance)} бонусов</strong>
+          <strong>{formatBonusCount(bonusBalance)}</strong>
         </span>
         <span className="bonus-card__meta">1 бонус = 1 ₽</span>
         <ArrowRight aria-hidden="true" />
@@ -273,7 +274,7 @@ export function HomePage() {
       </section>
 
       <p className="concept-note">
-        Неофициальный концепт мобильного приложения “Табрис”. Создан для
+        Неофициальный концепт мобильного приложения «Табрис». Создан для
         демонстрации.
       </p>
     </main>

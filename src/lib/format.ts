@@ -20,3 +20,26 @@ export const formatProductCount = (count: number) => {
           : 'товаров'
   return `${value} ${noun}`
 }
+
+export const formatBonusNoun = (count: number) => {
+  const safeCount = Number.isFinite(count) ? Math.max(0, count) : 0
+
+  if (!Number.isInteger(safeCount)) return 'бонуса'
+
+  const value = Math.trunc(safeCount)
+  const lastTwo = value % 100
+  const last = value % 10
+  const noun =
+    lastTwo >= 11 && lastTwo <= 14
+      ? 'бонусов'
+      : last === 1
+        ? 'бонус'
+        : last >= 2 && last <= 4
+          ? 'бонуса'
+          : 'бонусов'
+
+  return noun
+}
+
+export const formatBonusCount = (count: number) =>
+  `${formatPrice(Number.isFinite(count) ? Math.max(0, count) : 0)} ${formatBonusNoun(count)}`

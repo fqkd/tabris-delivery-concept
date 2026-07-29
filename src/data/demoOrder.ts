@@ -6,11 +6,14 @@ import type { OrderSnapshot } from '../types'
 
 export const DEMO_TRACKING_ORDER_ID = 'ДЕМО-230930'
 
-const minutesBefore = (date: Date, minutes: number) =>
-  new Date(date.getTime() - minutes * 60_000).toISOString()
-
-const formatHour = (hour: number) =>
-  `${String((hour + 24) % 24).padStart(2, '0')}:00`
+const atLocalTime = (date: Date, hour: number, minute: number) =>
+  new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    hour,
+    minute,
+  ).toISOString()
 
 export const createDemoTrackingOrder = (
   now = new Date(),
@@ -25,10 +28,8 @@ export const createDemoTrackingOrder = (
     DEMO_RULES.initialBonusBalance,
   )
   const dateKey = toLocalDateKey(now)
-  const timeLabel = `${formatHour(now.getHours())}–${formatHour(
-    now.getHours() + 2,
-  )}`
-  const createdAt = minutesBefore(now, 100)
+  const timeLabel = '10:00–12:00'
+  const createdAt = atLocalTime(now, 9, 10)
   const order = createOrderSnapshot({
     id: DEMO_TRACKING_ORDER_ID,
     createdAt,
@@ -63,15 +64,15 @@ export const createDemoTrackingOrder = (
     status: 'delivering',
     statusEvents: [
       { status: 'placed', occurredAt: createdAt },
-      { status: 'assembling', occurredAt: minutesBefore(now, 80) },
-      { status: 'courier', occurredAt: minutesBefore(now, 20) },
-      { status: 'delivering', occurredAt: minutesBefore(now, 12) },
+      { status: 'assembling', occurredAt: atLocalTime(now, 9, 30) },
+      { status: 'courier', occurredAt: atLocalTime(now, 10, 30) },
+      { status: 'delivering', occurredAt: atLocalTime(now, 10, 38) },
     ],
     eta: {
       minMinutes: 12,
       maxMinutes: 18,
     },
-    courierLocationUpdatedAt: minutesBefore(now, 2),
+    courierLocationUpdatedAt: atLocalTime(now, 10, 48),
   }
 }
 
