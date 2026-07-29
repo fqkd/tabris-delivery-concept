@@ -7,6 +7,7 @@ import { QuantityControl } from '../components/QuantityControl'
 import { DEMO_RULES } from '../config/demoRules'
 import { useShop } from '../context/ShopContext'
 import { calculateOrderTotals, getCartItems } from '../lib/cart'
+import { publicAssetUrl } from '../lib/deployment'
 import { formatPrice, formatProductCount } from '../lib/format'
 
 export function CartPage() {
@@ -104,7 +105,7 @@ export function CartPage() {
               aria-label={`Открыть товар «${product.name}»`}
             >
               <img
-                src={product.image}
+                src={publicAssetUrl(product.image)}
                 alt=""
                 width="600"
                 height="600"

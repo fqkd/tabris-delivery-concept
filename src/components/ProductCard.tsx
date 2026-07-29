@@ -1,6 +1,7 @@
 import { Heart, Plus } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { useShop } from '../context/ShopContext'
+import { publicAssetUrl } from '../lib/deployment'
 import { discountPercent, formatPrice } from '../lib/format'
 import type { Product } from '../types'
 import { QuantityControl } from './QuantityControl'
@@ -33,7 +34,7 @@ export function ProductCard({
           onClick={onOpen}
         >
           <img
-            src={product.image}
+            src={publicAssetUrl(product.image)}
             alt={product.name}
             loading="lazy"
             decoding="async"

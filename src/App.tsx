@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import {
   BrowserRouter,
+  HashRouter,
   Navigate,
   Route,
   Routes,
@@ -24,6 +25,9 @@ import { OrderSuccessPage } from './pages/OrderSuccessPage'
 import { ProductPage } from './pages/ProductPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { TrackingPage } from './pages/TrackingPage'
+import { USE_HASH_ROUTER } from './lib/deployment'
+
+const AppRouter = USE_HASH_ROUTER ? HashRouter : BrowserRouter
 
 const bottomNavPaths = new Set([
   '/',
@@ -155,11 +159,11 @@ function AppFrame() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <AppRouter>
       <ShopProvider>
         <AppFrame />
       </ShopProvider>
-    </BrowserRouter>
+    </AppRouter>
   )
 }
 

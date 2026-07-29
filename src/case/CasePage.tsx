@@ -22,11 +22,14 @@ import {
   type MouseEvent,
   type ReactNode,
 } from 'react'
+import { appHref, publicAssetUrl } from '../lib/deployment'
 
-const screenshots = '/images/case/screens'
-const products = '/images/products'
-const demoTrackingPath =
-  '/orders/%D0%94%D0%95%D0%9C%D0%9E-230930/tracking'
+const screenshots = publicAssetUrl('/images/case/screens')
+const products = publicAssetUrl('/images/products')
+const prototypeHomePath = appHref('/?source=case')
+const demoTrackingPath = appHref(
+  '/orders/%D0%94%D0%95%D0%9C%D0%9E-230930/tracking',
+)
 const searchFrames = ['empty', 's', 'st', 'ste', 'stei', 'steik'] as const
 
 type DeviceProps = {
@@ -70,7 +73,7 @@ type PrototypeLinkProps = {
 }
 
 function PrototypeLink({
-  href = '/?source=case',
+  href = prototypeHomePath,
   className = '',
   children,
 }: PrototypeLinkProps) {
@@ -186,7 +189,7 @@ export function CasePage() {
       <header className={`case-nav${scrolled ? ' is-scrolled' : ''}`}>
         <a className="case-nav__brand" href="#top" aria-label="К началу кейса">
           <img
-            src="/images/brand/tabris-app-mark.webp"
+            src={publicAssetUrl('/images/brand/tabris-app-mark.webp')}
             alt=""
             width="42"
             height="42"

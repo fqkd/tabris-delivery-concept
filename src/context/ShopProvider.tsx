@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react'
 import { getCartItemCount } from '../lib/cart'
+import { getInitialAppLocation } from '../lib/deployment'
 import { loadPersistedState, savePersistedState } from '../lib/storage'
 import {
   DEMO_TRACKING_ORDER_ID,
@@ -27,6 +28,7 @@ type ShopProviderProps = {
 }
 
 export function ShopProvider({ children }: ShopProviderProps) {
+  const initialLocation = getInitialAppLocation()
   const [state, dispatch] = useReducer(
     shopReducer,
     undefined,
@@ -35,8 +37,8 @@ export function ShopProvider({ children }: ShopProviderProps) {
   const [isAddressOpen, setAddressOpen] = useState(
     () =>
       state.address === null &&
-      window.location.pathname === '/' &&
-      new URLSearchParams(window.location.search).get('source') !== 'case',
+      initialLocation.pathname === '/' &&
+      new URLSearchParams(initialLocation.search).get('source') !== 'case',
   )
 
   useEffect(() => {

@@ -19,6 +19,7 @@ import { useShop } from '../context/ShopContext'
 import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice, formatProductCount } from '../lib/format'
 import { buildTrackingTimeline } from '../lib/order'
+import { publicAssetUrl } from '../lib/deployment'
 import type { OrderStatus, PaymentMethod } from '../types'
 
 const paymentLabels: Record<PaymentMethod, string> = {
@@ -189,7 +190,7 @@ export function TrackingPage() {
           </div>
           <div className="tracking-map-card">
             <img
-              src="/images/maps/courier-delivery-route.png"
+              src={publicAssetUrl('/images/maps/courier-delivery-route.png')}
               alt="Демонстрационная карта маршрута курьера от магазина к адресу доставки"
               width="1536"
               height="1024"
@@ -225,7 +226,7 @@ export function TrackingPage() {
           {order.lines.map((line) => (
             <li key={line.productId}>
               <img
-                src={line.image}
+                src={publicAssetUrl(line.image)}
                 alt=""
                 width="52"
                 height="52"

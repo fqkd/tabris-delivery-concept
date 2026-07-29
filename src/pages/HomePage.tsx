@@ -19,6 +19,7 @@ import { ProductCard } from '../components/ProductCard'
 import { useShop } from '../context/ShopContext'
 import { products } from '../data/products'
 import { getNearestDeliveryTimeLabel } from '../lib/deliveryDates'
+import { publicAssetUrl } from '../lib/deployment'
 import { formatPrice } from '../lib/format'
 import type { ProductCategoryId } from '../types'
 
@@ -124,7 +125,7 @@ export function HomePage() {
         <h1 className="visually-hidden">Доставка продуктов «Табрис»</h1>
         <div className="brand-lockup" aria-label="Табрис">
           <img
-            src="/images/brand/tabris-app-mark.webp"
+            src={publicAssetUrl('/images/brand/tabris-app-mark.webp')}
             alt=""
             width="34"
             height="34"
@@ -219,7 +220,9 @@ export function HomePage() {
           </span>
         </span>
         <img
-          src="/images/products/chicken-mushroom-pasta.webp"
+          src={publicAssetUrl(
+            '/images/products/chicken-mushroom-pasta.webp',
+          )}
           alt="Паста с курицей и грибами"
           width="600"
           height="600"

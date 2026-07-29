@@ -12,6 +12,7 @@ import { QuantityControl } from '../components/QuantityControl'
 import { useShop } from '../context/ShopContext'
 import { getProduct } from '../data/products'
 import { calculateProductBonus } from '../lib/cart'
+import { publicAssetUrl } from '../lib/deployment'
 import { discountPercent, formatPrice } from '../lib/format'
 
 export function ProductPage() {
@@ -43,7 +44,7 @@ export function ProductPage() {
       <main className="screen screen--product">
       <div className="product-hero">
         <img
-          src={product.image}
+          src={publicAssetUrl(product.image)}
           alt={product.name}
           width="600"
           height="600"

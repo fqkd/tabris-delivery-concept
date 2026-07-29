@@ -14,6 +14,7 @@ import { PageHeader } from '../components/PageHeader'
 import { useShop } from '../context/ShopContext'
 import { formatSavedDeliveryDate } from '../lib/deliveryDates'
 import { formatPrice, formatProductCount } from '../lib/format'
+import { publicAssetUrl } from '../lib/deployment'
 import type { PaymentMethod } from '../types'
 
 const paymentLabels: Record<PaymentMethod, string> = {
@@ -131,7 +132,7 @@ export function OrderSuccessPage() {
           {order.lines.map((line) => (
             <li key={line.productId}>
               <img
-                src={line.image}
+                src={publicAssetUrl(line.image)}
                 alt=""
                 width="56"
                 height="56"

@@ -9,6 +9,7 @@ import {
   calculateDinnerTotal,
   dinnerItemsToCartAdditions,
 } from '../lib/dinner'
+import { publicAssetUrl } from '../lib/deployment'
 import { formatPrice, formatProductCount } from '../lib/format'
 
 export function DinnerBuilderPage() {
@@ -85,7 +86,7 @@ export function DinnerBuilderPage() {
               >
                 {firstProduct && (
                   <img
-                    src={firstProduct.image}
+                    src={publicAssetUrl(firstProduct.image)}
                     alt=""
                     width="88"
                     height="72"
@@ -132,7 +133,7 @@ export function DinnerBuilderPage() {
                   aria-label={`Открыть товар «${product.name}»`}
                 >
                   <img
-                    src={product.image}
+                    src={publicAssetUrl(product.image)}
                     alt=""
                     width="88"
                     height="88"
